@@ -1,0 +1,226 @@
+[
+    {
+        "sigle": "1ACO2101",
+        "intitule": "Analyse Convexe"
+    },
+    {
+        "sigle": "ANG1201",
+        "intitule": "Anglais scientifique 1"
+    },
+    {
+        "sigle": "ANG1401",
+        "intitule": "Anglais scientifique 2"
+    },
+    {
+        "sigle": "CHM1201",
+        "intitule": "Chimie générale et atomistique"
+    },
+    {
+        "sigle": "DAF2101",
+        "intitule": "Distribution et analyse de Fourier"
+    },
+    {
+        "sigle": "DID1601",
+        "intitule": "Project scientifique"
+    },
+    {
+        "sigle": "INF1101",
+        "intitule": "Architecture de l\\'ordinateur"
+    },
+    {
+        "sigle": "INF1201",
+        "intitule": "Programmation en langage C 1"
+    },
+    {
+        "sigle": "INF1301",
+        "intitule": "Programmation en langage C 2"
+    },
+    {
+        "sigle": "INF1401",
+        "intitule": "Structure de données avancées"
+    },
+    {
+        "sigle": "INF2308",
+        "intitule": "Architecture Logicielle"
+    },
+    {
+        "sigle": "ITP2015",
+        "intitule": "Théorie des probabilités"
+    },
+    {
+        "sigle": "MTH1101",
+        "intitule": "Logique et théorie des ensembles"
+    },
+    {
+        "sigle": "MTH1102",
+        "intitule": "Analyse I"
+    },
+    {
+        "sigle": "MTH1103",
+        "intitule": "Structures algébriques et arithmétique dans Z"
+    },
+    {
+        "sigle": "MTH1201",
+        "intitule": "Algèbre linéaire"
+    },
+    {
+        "sigle": "MTH1202",
+        "intitule": "Analyse 2"
+    },
+    {
+        "sigle": "MTH1203",
+        "intitule": "Probabilité 1"
+    },
+    {
+        "sigle": "MTH1301",
+        "intitule": "Algèbre multilinéaire"
+    },
+    {
+        "sigle": "MTH1302",
+        "intitule": "Fonctions de plusieurs variables"
+    },
+    {
+        "sigle": "MTH1303",
+        "intitule": "Suites et Séries de fonctions"
+    },
+    {
+        "sigle": "MTH1401",
+        "intitule": "Géométrie affine"
+    },
+    {
+        "sigle": "MTH1402",
+        "intitule": "Intégrales généralisées"
+    },
+    {
+        "sigle": "MTH1403",
+        "intitule": "Mécanique de solide"
+    },
+    {
+        "sigle": "MTH1404",
+        "intitule": "Probabilité 2"
+    },
+    {
+        "sigle": "MTH1501",
+        "intitule": "Topologie"
+    },
+    {
+        "sigle": "MTH1502",
+        "intitule": "Mesure et intégration"
+    },
+    {
+        "sigle": "MTH1503",
+        "intitule": "Vecteurs aléatoires"
+    },
+    {
+        "sigle": "MTH1504",
+        "intitule": "Algèbre commutative"
+    },
+    {
+        "sigle": "MTH1505",
+        "intitule": "Méthodes numériques"
+    },
+    {
+        "sigle": "MTH1601",
+        "intitule": "Équations différentielles ordinaires"
+    },
+    {
+        "sigle": "MTH1602",
+        "intitule": "Équations aux dérivées partielles"
+    },
+    {
+        "sigle": "MTH1603",
+        "intitule": "Géométrie des courbes et surfaces"
+    },
+    {
+        "sigle": "MTH1604",
+        "intitule": "Statistique inférentielle"
+    },
+    {
+        "sigle": "MTH2102",
+        "intitule": "Complément de topologie générale et espaces fonctionnels"
+    },
+    {
+        "sigle": "MTH2103",
+        "intitule": "Algèbre et Géométrie"
+    },
+    {
+        "sigle": "MTH2104",
+        "intitule": "Analyse convexe et optimisation"
+    },
+    {
+        "sigle": "MTH2105",
+        "intitule": "Introduction à la théorie des probabilité"
+    },
+    {
+        "sigle": "MTH2106",
+        "intitule": "Vecteurs et suites aléatoires"
+    },
+    {
+        "sigle": "MTH2107",
+        "intitule": "Initiation au traitement de texte scientifique"
+    },
+    {
+        "sigle": "MTH2108",
+        "intitule": "Initiation au SCILAB"
+    },
+    {
+        "sigle": "MTH2109",
+        "intitule": "Anglais scientifique"
+    },
+    {
+        "sigle": "PHI1201",
+        "intitule": "Français - Philosophie 1"
+    },
+    {
+        "sigle": "PHI1301",
+        "intitule": "Français-Philosophie 2"
+    },
+    {
+        "sigle": "PHY1101",
+        "intitule": "Mécanique classique"
+    },
+    {
+        "sigle": "PHY1102",
+        "intitule": "Électrocinétique"
+    },
+    {
+        "sigle": "PHY1103",
+        "intitule": "Sciences industrielles pour l\\'ingénieur 1"
+    },
+    {
+        "sigle": "PHY1201",
+        "intitule": "Electromagnétisme et optique géométrique"
+    },
+    {
+        "sigle": "PHY1203",
+        "intitule": "Sciences industrielles pour l\\'ingénieur 2"
+    },
+    {
+        "sigle": "PHY1301",
+        "intitule": "Mécanique des fluides et relativité restreinte"
+    },
+    {
+        "sigle": "PHY1302",
+        "intitule": "Électromagnétisme et Mécanique quantique"
+    },
+    {
+        "sigle": "PHY1303",
+        "intitule": "Sciences industrielles pour ingénieur 3"
+    },
+    {
+        "sigle": "PHY1401",
+        "intitule": "Thermodynamique et optique physique"
+    },
+    {
+        "sigle": "PHY1402",
+        "intitule": "Sciences industrielles pour l\\'ingénieur 4"
+    },
+    {
+        "sigle": "PHY2101",
+        "intitule": "Mécanique Analytique"
+    },
+    {
+        "sigle": "PSY1101",
+        "intitule": "Psychologie éducative et théorie de l\\'apprentissage"
+    }
+]

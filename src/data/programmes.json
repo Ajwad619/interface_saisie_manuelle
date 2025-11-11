@@ -1,0 +1,62 @@
+[
+    {
+        "code": "PREPA-TIC",
+        "titre": "CPGE option Technologie de l\\'Information et de la Communication"
+    },
+    {
+        "code": "PREPA-PCSI",
+        "titre": "CPGE option Physique Chimie et Science de l\\'Ingénieur"
+    },
+    {
+        "code": "MR-SPR",
+        "titre": "Master en Statistique et Probabilité"
+    },
+    {
+        "code": "DOC-SPR",
+        "titre": "Doctorat en Statistique et Probabilité"
+    },
+    {
+        "code": "MR-DST",
+        "titre": "Master en Didactique des Sciences et technologies"
+    },
+    {
+        "code": "DOC-DST",
+        "titre": "Doctorat en Didactique des Sciences et Technologies"
+    },
+    {
+        "code": "PREPA-MPSI",
+        "titre": "CPGE option Mathématiques, Physiques et Sciences de l\\'Ingénieur"
+    },
+    {
+        "code": "DOC-TIC",
+        "titre": "Doctorat en Technologie de l\\'Information et de la Communication"
+    },
+    {
+        "code": "MR-TIC",
+        "titre": "Master en Sciences de données"
+    },
+    {
+        "code": "MR-MFA",
+        "titre": "Master en Mathématiques Fondamentales et Applications"
+    },
+    {
+        "code": "DOC-MFA",
+        "titre": "Doctorat en Mathématiques Fondamentales et Applications"
+    },
+    {
+        "code": "MR- PTA",
+        "titre": "Master e Physique Théorique et Applications"
+    },
+    {
+        "code": "DOC-PTA",
+        "titre": "Doctorat en Physique Théorique et Applications"
+    },
+    {
+        "code": "MR-ROP",
+        "titre": "Master en Recherche Opérationnelle"
+    },
+    {
+        "code": "DOC-ROP",
+        "titre": "Doctorat en Recherche Opérationnelle"
+    }
+]

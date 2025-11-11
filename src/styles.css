@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+body {
+  background-color: #f8f9fa; /* Fond gris clair */
+  font-family: 'Inter', sans-serif; /* Police Inter */
+}
+
+.form-section {
+  background-color: #fbf6ebff; /* Fond crème pour les sections */
+  padding: 30px;
+  border-radius: 15px; /* Bordures arrondies */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Ombres */
+  margin-bottom: 30px; /* Marge en bas */
+}
+
+h1.title {
+  text-align: center; /* Centré */
+  margin: 40px 0;
+  font-weight: bold; /* Gras */
+  color: #343a40; /* Couleur sombre */
+}
+
+.form-label {
+  font-weight: 500; /* Semi-gras pour les labels */
+}
+
+/* Styles pour le tableau */
+.table {
+  margin-top: 20px;
+}
+
+/* Styles pour le mini-formulaire de création de programme */
+.card {
+  margin-top: 20px;
+}
+
+/* Cacher les sections au départ (comme d-none) */
+.hidden {
+  display: none;
+}
