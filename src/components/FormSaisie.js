@@ -1,36 +1,28 @@
 // === IMPORTATIONS ===
-import React, { useState } from 'react'; // Ajout de useState
+import React, { useState } from 'react';
 import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import SectionHistorique from './SectionHistorique';
 
 // === COMPOSANT PRINCIPAL ===
 function FormSaisie() {
-  // === ÉTATS GLOBAUX POUR AFFICHER/MASQUER LES SECTIONS ===
   const [showSection2, setShowSection2] = useState(false);
   const [showSection3, setShowSection3] = useState(false);
-  const [showSoumission, setShowSoumission] = useState(false); // Pour le bouton soumettre
+  const [showSoumission, setShowSoumission] = useState(false);
 
-  // AJOUT : État pour alerte globale, inspiré de index.php (alert-container)
   const [alerte, setAlerte] = useState(null);
 
-  // AJOUT : État pour déclencher la soumission dans SectionHistorique
   const [triggerSoumission, setTriggerSoumission] = useState(false);
 
-  // === FONCTIONS POUR LES TRANSITIONS ===
-  // Après recherche réussie dans SectionCours
-  const handleAfterSearch = () => {
-    setShowSection2(true); // Affiche section2
-  };
+  // === TRANSITIONS ===
+  const handleAfterSearch = () => setShowSection2(true);
 
-  // Après validation dans SectionSession
   const handleAfterValidation = () => {
-    setShowSection2(false); // Masque section2
-    setShowSection3(true); // Affiche section3
-    setShowSoumission(true); // Affiche soumission
+    setShowSection2(false);
+    setShowSection3(true);
+    setShowSoumission(true);
   };
 
-  // AJOUT : Fonctions pour masquer les sections suivantes lors des réinitialisations
   const masquerSection2EtSuivantes = () => {
     setShowSection2(false);
     setShowSection3(false);
@@ -42,67 +34,96 @@ function FormSaisie() {
     setShowSoumission(false);
   };
 
-  const masquerSoumission = () => {
-    setShowSoumission(false);
-  };
+  const masquerSoumission = () => setShowSoumission(false);
 
-  // Fonction pour soumettre le formulaire (appelée depuis SectionHistorique via onSoumettre)
+  // === SOUMISSION ===
   const handleSoumettre = async (data) => {
     try {
       const formData = new FormData();
       Object.keys(data).forEach(key => formData.append(key, data[key]));
+
       const response = await fetch('traitement_inscription.php', {
         method: 'POST',
         body: formData
       });
+
       const result = await response.json();
+
       if (result.success) {
         setAlerte({ message: result.message, type: 'success' });
       } else {
         setAlerte({ message: result.message, type: 'danger' });
       }
-    } catch (error) {
+
+    } catch {
       setAlerte({ message: 'Erreur soumission.', type: 'danger' });
     }
   };
 
-  // AJOUT : Fonction pour déclencher la soumission via l'état partagé
-  const declencherSoumission = () => {
-    setTriggerSoumission(true); // Déclenche handleSoumettre dans SectionHistorique
-  };
+  const declencherSoumission = () => setTriggerSoumission(true);
 
   // === RENDU ===
   return (
-    <div>
-      {/* Conteneur alerte globale */}
-      {alerte && (
-        <div className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
-          {alerte.message}
-          <button type="button" className="btn-close" onClick={() => setAlerte(null)} />
-        </div>
-      )}
+    <div className="container mt-4">
 
-      <form>
-        {/* Section 1 : Passe onReinitialiser pour masquer les suivantes */}
-        <SectionCours onAfterSearch={handleAfterSearch} onReinitialiser={masquerSection2EtSuivantes} />
+      <div className="row justify-content-center">
+        <div className="col-12 col-lg-10">
 
-        {/* Section 2 : Passe onReinitialiser pour masquer les suivantes */}
-        <div className={showSection2 ? '' : 'd-none'}>
-          <SectionSession onAfterValidation={handleAfterValidation} onReinitialiser={masquerSection3EtSoumission} />
-        </div>
+          {/* Alerte globale */}
+          {alerte && (
+            <div className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
+              {alerte.message}
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setAlerte(null)}
+              />
+            </div>
+          )}
 
-        {/* Section 3 : Passe onReinitialiser pour masquer Soumission, et triggerSoumission pour déclencher la soumission */}
-        <div className={showSection3 ? '' : 'd-none'}>
-          <SectionHistorique onSoumettre={handleSoumettre} onReinitialiser={masquerSoumission} triggerSoumission={triggerSoumission} setTriggerSoumission={setTriggerSoumission} />
-        </div>
+          <form>
 
-        {/* Bouton soumettre : Déclenche la soumission via l'état partagé */}
-        <div className={`text-center mb-5 ${showSoumission ? '' : 'd-none'}`}>
-          <button type="button" className="btn btn-success btn-lg w-50" id="soumissionFinale" onClick={declencherSoumission}>
-            Soumission finale
-          </button>
+            {/* SECTION 1 */}
+            <SectionCours
+              onAfterSearch={handleAfterSearch}
+              onReinitialiser={masquerSection2EtSuivantes}
+            />
+
+            {/* SECTION 2 */}
+            <div className={showSection2 ? '' : 'd-none'}>
+              <SectionSession
+                onAfterValidation={handleAfterValidation}
+                onReinitialiser={masquerSection3EtSoumission}
+              />
+            </div>
+
+            {/* SECTION 3 */}
+            <div className={showSection3 ? '' : 'd-none'}>
+              <SectionHistorique
+                onSoumettre={handleSoumettre}
+                onReinitialiser={masquerSoumission}
+                triggerSoumission={triggerSoumission}
+                setTriggerSoumission={setTriggerSoumission}
+              />
+            </div>
+
+            {/* BOUTON FINAL */}
+            <div className={`text-center mb-5 ${showSoumission ? '' : 'd-none'}`}>
+              <button
+                type="button"
+                className="btn btn-success btn-lg w-50"
+                id="soumissionFinale"
+                onClick={declencherSoumission}
+              >
+                Soumission finale
+              </button>
+            </div>
+
+          </form>
+
         </div>
-      </form>
+      </div>
+
     </div>
   );
 }

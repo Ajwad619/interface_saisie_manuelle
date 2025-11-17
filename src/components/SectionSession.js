@@ -20,7 +20,6 @@ function validerNomEnseignant(nom) {
 // === COMPOSANT SECTION SESSION ===
 function SectionSession({ onAfterValidation , onReinitialiser }) {
   // === ÉTATS AVEC useState ===
-  // Chaque champ a sa boîte pour se souvenir de la valeur donc un useState pour chaque
   const [anneeAcademique, setAnneeAcademique] = useState('');  
   const [semestre, setSemestre] = useState(''); 
   const [creditCours, setCreditCours] = useState(''); 
@@ -35,26 +34,22 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
   // États pour les erreurs
   const [erreurs, setErreurs] = useState({});
 
-  // AJOUT : État pour les alertes, inspiré de programme.js (alertes pour erreurs de sauvegarde)
+  // AJOUT : État pour les alertes
   const [alerte, setAlerte] = useState(null);
 
   // === CHARGER LES PROGRAMMES AU DÉMARRAGE ===
-  // useEffect : comme un robot qui fait une tâche automatique au départ.
   useEffect(() => {
-    // on charge programmes.json .
     fetch('/data/programmes.json')
       .then(response => response.json())
-      .then(data => setProgrammes(data))  // Mettre dans la boîte programmes
+      .then(data => setProgrammes(data))
       .catch(console.error);
-  }, []);  // [] signifie "une seule fois au démarrage"
+  }, []);
 
   // === FONCTIONS POUR LES BOUTONS ===
-  // Afficher le mini-formulaire pour créer un programme.
   const handleAfficherMiniForm = () => {
-    setShowMiniForm(true);  // Changer la boîte showMiniForm à vrai
+    setShowMiniForm(true);
   };
 
-  // Annuler la création : cacher et vider.
   const handleAnnulerCreation = () => {
     setShowMiniForm(false);
     setNouveauCode('');
@@ -62,16 +57,21 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
     setNouveauNiveau('');
   };
 
-  // Sauvegarder le nouveau programme.
+  // Sauvegarder le nouveau programme
   const handleSauvegarderCreation = async () => {
     if (!nouveauCode || !nouveauTitre || !nouveauNiveau) {
       setAlerte({ message: 'Tous champs requis.', type: 'warning' });
       return;
     }
     try {
-      const result = await enregistrerProgramme({ code: nouveauCode, titre: nouveauTitre, niveau: nouveauNiveau });
+      const result = await enregistrerProgramme({
+        code: nouveauCode,
+        titre: nouveauTitre,
+        niveau: nouveauNiveau
+      });
+
       if (result.success) {
-        setProgrammes([...programmes, result.nouveauProgramme]); // AJOUT : Mise à jour dynamique de la liste programmes, comme dans programme.js
+        setProgrammes([...programmes, result.nouveauProgramme]);
         setShowMiniForm(false);
         setAlerte({ message: 'Programme ajouté !', type: 'success' });
       } else {
@@ -82,41 +82,48 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
     }
   };
 
-  // Validation complète au clic sur Valider
+  // Validation complète
   const handleValider = () => {
     const nouvellesErreurs = {};
+
     if (!validerAnnee(anneeAcademique.trim())) {
       nouvellesErreurs.anneeAcademique = "Format d'année incorrect, attendu ex: 22-23";
     }
+
     if (!semestre || !(parseInt(semestre) >= 1 && parseInt(semestre) <= 7)) {
       nouvellesErreurs.semestre = "Veuillez sélectionner un semestre valide (1 à 7)";
     }
+
     const creditInt = parseInt(creditCours);
     if (isNaN(creditInt) || creditInt < 0 || creditInt > 15) {
       nouvellesErreurs.creditCours = "Crédit du cours doit être un nombre entre 0 et 15";
     }
+
     if (!codeProgramme) {
       nouvellesErreurs.codeProgramme = "Veuillez sélectionner un code programme";
     }
+
     if (idEnseignant.trim() && !validerNomEnseignant(idEnseignant.trim())) {
-        nouvellesErreurs.idEnseignant = "Le nom de l'enseignant ne peut contenir que des lettres et espaces";
+      nouvellesErreurs.idEnseignant = "Le nom de l'enseignant ne peut contenir que des lettres et espaces";
     }
+
     setErreurs(nouvellesErreurs);
-    // S'il n'y a pas d'erreurs, procéder
+
     if (Object.keys(nouvellesErreurs).length === 0) {
       if (onAfterValidation) onAfterValidation();
     }
   };
 
-  // Fonction de style dynamique pour surbrillance rouge et animation
-  const classInput = (field) => erreurs[field] ? "form-control is-invalid animate-shake" : "form-control";
+  // Surbrillance rouge
+  const classInput = (field) =>
+    erreurs[field] ? "form-control is-invalid animate-shake" : "form-control";
 
-  // === RENDU DU COMPOSANT ===
+  // === RENDU ===
   return (
     <div className="form-section">
       <h4>Informations session de cours</h4>
 
-      {/* AJOUT : Affichage de l'alerte pour erreurs de sauvegarde programme, comme dans programme.js */}
+      {/* Alerte */}
       {alerte && (
         <div className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
           {alerte.message}
@@ -125,22 +132,30 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
       )}
 
       <div className="row">
+        {/* Année académique */}
         <div className="col-md-6 mb-3">
-          <label className="form-label">Annee academique < span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">
+            Annee academique <span style={{ color: 'red' }}>*</span>
+          </label>
           <input
             type="text"
-            id="anneeAcademique" 
+            id="anneeAcademique"
             className={classInput("anneeAcademique")}
             value={anneeAcademique}
             onChange={(e) => setAnneeAcademique(e.target.value)}
-            placeholder='ex : 23-24'
+            placeholder="ex : 23-24"
             required
           />
-          {erreurs.anneeAcademique && <div className="invalid-feedback">{erreurs.anneeAcademique}</div>}
+          {erreurs.anneeAcademique && (
+            <div className="invalid-feedback">{erreurs.anneeAcademique}</div>
+          )}
         </div>
 
+        {/* Semestre */}
         <div className="col-md-6 mb-3">
-          <label className="form-label">Semestre <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">
+            Semestre <span style={{ color: 'red' }}>*</span>
+          </label>
           <select
             className={classInput("semestre")}
             id="semestre"
@@ -148,7 +163,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             onChange={(e) => setSemestre(e.target.value)}
             required
           >
-            <option disabled>-- Sélectionner --</option>
+            <option value="">-- Sélectionner --</option>
             {Array.from({ length: 7 }, (_, i) => i + 1).map(i => (
               <option key={i} value={i}>{i}</option>
             ))}
@@ -156,22 +171,29 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
           {erreurs.semestre && <div className="invalid-feedback">{erreurs.semestre}</div>}
         </div>
 
+        {/* Crédits */}
         <div className="col-md-6 mb-3">
-          <label className="form-label">Credit du cours <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">
+            Credit du cours <span style={{ color: 'red' }}>*</span>
+          </label>
           <input
-            type="text"
+            type="number"
             id="creditCours"
             className={classInput("creditCours")}
             value={creditCours}
             onChange={(e) => setCreditCours(e.target.value)}
-            min="0" max="15" step="1"
+            min="0"
+            max="15"
             required
           />
           {erreurs.creditCours && <div className="invalid-feedback">{erreurs.creditCours}</div>}
         </div>
 
+        {/* Code programme */}
         <div className="col-md-6 mb-3">
-          <label className="form-label">Code Programme <span style={{ color: 'red' }}>*</span></label>
+          <label className="form-label">
+            Code Programme <span style={{ color: 'red' }}>*</span>
+          </label>
           <select
             className={classInput("codeProgramme")}
             id="codeProgramme"
@@ -179,14 +201,17 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             onChange={(e) => setCodeProgramme(e.target.value)}
             required
           >
-            <option disabled>-- Sélectionner --</option>
+            <option value="">-- Sélectionner --</option>
             {programmes.map((prog, index) => (
-              <option key={index} value={prog.code}>{prog.code} - {prog.titre}</option>
+              <option key={index} value={prog.code}>
+                {prog.code} - {prog.titre}
+              </option>
             ))}
           </select>
           {erreurs.codeProgramme && <div className="invalid-feedback">{erreurs.codeProgramme}</div>}
         </div>
 
+        {/* Enseignant */}
         <div className="col-md-6 mb-3">
           <label className="form-label">Identifiant de l'enseignant (optionnel)</label>
           <input
@@ -198,6 +223,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
           {erreurs.idEnseignant && <div className="invalid-feedback">{erreurs.idEnseignant}</div>}
         </div>
 
+        {/* Mini formulaire création programme */}
         <div className="col-md-6 mb-3 d-flex align-items-end">
           <button
             type="button"
@@ -271,6 +297,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
           </div>
         )}
 
+        {/* Boutons finaux */}
         <div className="col-md-6 mt-4">
           <button
             type="button"
@@ -303,6 +330,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
         </div>
       </div>
 
+      {/* Animation erreurs */}
       <style>{`
         .animate-shake {
           animation: shake 0.3s;

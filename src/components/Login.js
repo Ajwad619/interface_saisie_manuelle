@@ -14,53 +14,62 @@ function Login() {
 
     try {
       const res = await login(loginInput, passwordInput);
-      console.log('=> réponse login:', res);
-
-      console.log('Réponse du serveur:', res);
 
       if (res.success) {
-        navigate('/cours'); 
+        navigate('/cours');
       } else {
         setError(res.message || 'Login ou mot de passe incorrect');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError('Erreur serveur. Veuillez réessayer.');
     }
   };
 
   return (
-    <div className="login-container" style={{ maxWidth: '400px', margin: '50px auto' }}>
-      <h2>Connexion</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-6 col-lg-4">
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Identifiant</label>
-          <input
-            type="text"
-            className="form-control"
-            value={loginInput}
-            onChange={(e) => setLoginInput(e.target.value)}
-            required
-          />
+          <div className="form-section">
+            <h2 className="text-center mb-4">Connexion</h2>
+
+            {error && (
+              <div className="alert alert-danger text-center">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Identifiant</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={loginInput}
+                  onChange={(e) => setLoginInput(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Mot de passe</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary w-100 mt-3">
+                Se connecter
+              </button>
+            </form>
+          </div>
+
         </div>
-
-        <div className="form-group mt-3">
-          <label>Mot de passe</label>
-          <input
-            type="password"
-            className="form-control"
-            value={passwordInput}
-            onChange={(e) => setPasswordInput(e.target.value)}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary mt-4 w-100">
-          Se connecter
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

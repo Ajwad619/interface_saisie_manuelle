@@ -1,10 +1,5 @@
 <?php
 
-// CORS pour dev
-// --- CORS : doit être avant toute sortie ---
-
-
-// OPTIONS pré-vol
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }

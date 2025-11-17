@@ -1,40 +1,102 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-body {
+/* --- STYLES GLOBAUX --- */
+html, body {
+  margin: 0;
+  padding: 0;
   background-color: #f8f9fa; /* Fond gris clair */
-  font-family: 'Inter', sans-serif; /* Police Inter */
+  font-family: 'Inter', sans-serif;
 }
 
+/* --- SECTIONS DE FORMULAIRE --- */
 .form-section {
-  background-color: #fbf6ebff; /* Fond crème pour les sections */
+  background-color: #fbf6ebff; /* Fond crème */
   padding: 30px;
-  border-radius: 15px; /* Bordures arrondies */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Ombres */
-  margin-bottom: 30px; /* Marge en bas */
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* --- TITRES --- */
 h1.title {
-  text-align: center; /* Centré */
+  text-align: center;
   margin: 40px 0;
-  font-weight: bold; /* Gras */
-  color: #343a40; /* Couleur sombre */
+  font-weight: bold;
+  color: #343a40;
 }
 
-.form-label {
-  font-weight: 500; /* Semi-gras pour les labels */
+/* --- LABELS DE FORMULAIRE --- */
+.form-label { 
+  font-weight: 500;
 }
 
-/* Styles pour le tableau */
+/* --- TABLEAUX --- */
 .table {
   margin-top: 20px;
 }
 
-/* Styles pour le mini-formulaire de création de programme */
+/* --- CARTES (Petits formulaires, blocs) --- */
 .card {
   margin-top: 20px;
 }
 
-/* Cacher les sections au départ (comme d-none) */
+/* --- CLASSE POUR MASQUER (équivalent à d-none) --- */
 .hidden {
   display: none;
 }
+
+/* --- BLOCS POUR LES ÉVALUATIONS --- */
+.evaluation-block {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: .375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.evaluation-header-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* --- BOUTON SUPPRESSION ÉVALUATION --- */
+.remove-btn {
+  background-color: transparent;
+  color: #dc3545;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* --- ASTÉRISQUE CHAMPS REQUIS --- */
+.required-field::after {
+  content: " *";
+  color: red;
+}
+
+/* --- STYLES POUR LA PAGE PRINCIPALE --- */
+.page-section {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.page-card {
+  background: #fbf6ebff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
