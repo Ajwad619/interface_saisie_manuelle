@@ -58,5 +58,20 @@
     {
         "code": "DOC-ROP",
         "titre": "Doctorat en Recherche Opérationnelle"
+    },
+    {
+        "code": "AZER",
+        "titre": "AZERTYUIOP",
+        "niveau": "1"
+    },
+    {
+        "code": "qsf",
+        "titre": "qsdfghjk",
+        "niveau": "1"
+    },
+    {
+        "code": "qswx",
+        "titre": "wxcvbnbn",
+        "niveau": "1"
     }
 ]

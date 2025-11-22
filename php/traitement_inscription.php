@@ -1,33 +1,63 @@
 <?php
 
-    header("Access-Control-Allow-Origin: http://localhost:3000"); // ✅ origine exacte
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Access-Control-Allow-Credentials: true");
-    
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/utils.php';
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
+/*ini_set('display_errors', 0); // important : rien n'est affiché
+ini_set('log_errors', 1);
+error_reporting(E_ALL);*/
+
 session_start();
+
+var_dump($_SESSION);
+exit;
+
 try {
-    $pdo = getDatabaseConnection('temp');
-    $data = extraireDonnees($_POST);
-    validerDonnees($data);
-    $ajoutePar = $_SESSION['user_id'];
-    if (!isset($ajoutePar)) {
-        envoyerReponse("Erreur : utilisateur non authentifié.", false);
+    // -------------------------------------------------------------
+    // 1) LIRE LE JSON ENVOYÉ PAR REACT VIA api.js
+    // -------------------------------------------------------------
+    $raw = file_get_contents("php://input");
+    $postData = json_decode($raw, true);
+
+    if (!$postData) {
+        envoyerReponse("Erreur : données JSON invalides ou vides.", false);
     }
+
+    // -------------------------------------------------------------
+    // 2) EXTRAIRE LES DONNÉES
+    // -------------------------------------------------------------
+    $data = extraireDonnees($postData);
+
+    // -------------------------------------------------------------
+    // 3) VALIDATION DES CHAMPS REQUIS
+    // -------------------------------------------------------------
+    validerDonnees($data);
+
+    // -------------------------------------------------------------
+    // 4) VÉRIFIER QUE L’UTILISATEUR EST CONNECTÉ
+    // -------------------------------------------------------------
+    /*$ajoutePar = $_SESSION['user_id'] ?? null;
+
+    if (!$ajoutePar) {
+        envoyerReponse("Erreur : utilisateur non authentifié.", false);
+    }*/
+
+    // Connexion DB
+    $pdo = getDatabaseConnection('temp');
+
+    // -------------------------------------------------------------
+    // 5) INSERER OU COMPARER LA SESSION DE COURS
+    // -------------------------------------------------------------
     insererSessionCours($pdo, $data);
 
-    // if (inscriptionExiste($pdo, $data)) {
-    //     $existantes = recupererInscriptionExistante($pdo, $data);
-    //     if (donneesIdentiques($existantes, $data)) {
-    //         envoyerReponse("Aucune modification nécessaire : données déjà présentes.", false);
-    //     }
-    //     envoyerReponse("⚠️ Conflit détecté : des données différentes existent déjà pour l'inscription au cours de cet étudiant.", false);
-    // }
+    // -------------------------------------------------------------
+    // 6) VÉRIFIER SI L’INSCRIPTION EXISTE JÀ
+    // -------------------------------------------------------------
     if (inscriptionExiste($pdo, $data)) {
         $existantes = recupererInscriptionExistante($pdo, $data);
         $champsDifferents = donneesDifferentes($existantes, $data);
@@ -36,49 +66,67 @@ try {
             envoyerReponse("Aucune modification nécessaire : données déjà présentes.", false);
         }
 
-        envoyerReponse("⚠️ Conflit détecté : les champs " . implode(', ', $champsDifferents) . " ne correspondent pas avec l'inscription existante.", false);
+        envoyerReponse(
+            "⚠️ Conflit détecté : les champs " . implode(', ', $champsDifferents) .
+            " ne correspondent pas avec l'inscription existante.",
+            false
+        );
     }
 
-
+    // -------------------------------------------------------------
+    // 7) INSÉRER L’INSCRIPTION
+    // -------------------------------------------------------------
     insererInscriptionCours($pdo, $data, $ajoutePar);
+
     envoyerReponse("Inscription enregistrée avec succès.");
+
 } catch (PDOException $e) {
     envoyerReponse("Erreur PDO : " . $e->getMessage(), false);
 } catch (Exception $e) {
     envoyerReponse("Erreur serveur : " . $e->getMessage(), false);
 }
 
+
+
+
+// ============================================================================
+//                 FONCTIONS UTILISÉES DANS LE SCRIPt
+// ============================================================================
+
 function extraireDonnees(array $post): array
 {
     return [
-        'matricule' => $post['matricule'] ?? null,
-        'nom' => $post['nom'] ?? null,
-        'prenoms' => $post['prenoms'] ?? null,
-        'sigleCours' => $post['sigleCours'] ?? null,
-        'intituleCours' => $post['intituleCours'] ?? null,
-        'idEnseignant' => $post['idEnseignant'] ?? null,
-        'creditCours' => $post['creditCours'] ?? null,
-        'codeProgramme' => $post['codeProgramme'] ?? null,
-        'anneeAcademique' => $post['anneeAcademique'] ?? null,
-        'semestre' => $post['semestre'] ?? null,
-        'notes' => $post['notes'] ?? null,
-        'noteRattrapage' => isset($post['noteRattrapage']) && $post['noteRattrapage'] !== '' ? $post['noteRattrapage'] : null,
-        'moyenneFinale' => isset($post['moyenneFinale']) && $post['moyenneFinale'] !== '' ? $post['moyenneFinale'] : null,
-        'appreciations' => $post['appreciations'] ?? null,
-        'sanction' => $post['sanction'] ?? null,
-        'dateInscription' => date('Y-m-d'),
+        'matricule'        => $post['matricule'] ?? null,
+        'nom'              => $post['nom'] ?? null,
+        'prenoms'          => $post['prenoms'] ?? null,
+        'sigleCours'       => $post['sigleCours'] ?? null,
+        'intituleCours'    => $post['intituleCours'] ?? null,
+        'idEnseignant'     => $post['idEnseignant'] ?? null,
+        'creditCours'      => $post['creditCours'] ?? null,
+        'codeProgramme'    => $post['codeProgramme'] ?? null,
+        'anneeAcademique'  => $post['anneeAcademique'] ?? null,
+        'semestre'         => $post['semestre'] ?? null,
+        'notes'            => $post['notes'] ?? null,
+        'noteRattrapage'   => $post['noteRattrapage'] !== '' ? $post['noteRattrapage'] : null,
+        'moyenneFinale'    => $post['moyenneFinale'] !== '' ? $post['moyenneFinale'] : null,
+        'appreciations'    => $post['appreciations'] ?? null,
+        'sanction'         => $post['sanction'] ?? null,
+        'dateInscription'  => date('Y-m-d'),
     ];
 }
+
 
 function validerDonnees(array $data): void
 {
     $requis = ['intituleCours', 'codeProgramme', 'anneeAcademique', 'semestre', 'sanction'];
+
     foreach ($requis as $champ) {
         if (empty($data[$champ])) {
             envoyerReponse("Erreur : champ '$champ' manquant.", false);
         }
     }
 }
+
 
 function insererSessionCours(PDO $pdo, array $data): void
 {
@@ -101,32 +149,24 @@ function insererSessionCours(PDO $pdo, array $data): void
     $existante = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($existante) {
-        // Comparer les champs critiques
-        $conflit = false;
-        $detailsConflit = [];
-
+        $conflit = [];
         if ($existante['intituleCours'] !== $data['intituleCours']) {
-            $conflit = true;
-            $detailsConflit[] = "intitulé du cours";
+            $conflit[] = "intitulé du cours";
         }
         if ($existante['idEnseignant'] !== $data['idEnseignant']) {
-            $conflit = true;
-            $detailsConflit[] = "enseignant";
+            $conflit[] = "enseignant";
         }
-        if ((int) $existante['creditCours'] !== (int) $data['creditCours']) {
-            $conflit = true;
-            $detailsConflit[] = "crédit du cours";
+        if ((int)$existante['creditCours'] !== (int)$data['creditCours']) {
+            $conflit[] = "crédit du cours";
         }
 
-        if ($conflit) {
-            envoyerReponse("⚠️ Conflit détecté dans l'historique de session de cours : " . implode(', ', $detailsConflit) . " ne correspond(ent) pas.", false);
+        if (!empty($conflit)) {
+            envoyerReponse("⚠️ Conflit détecté dans l'historique de session de cours : " . implode(', ', $conflit) . " ne correspond(ent) pas.", false);
         }
 
-        // Sinon, pas de conflit => on ne fait rien (déjà présent)
-        return;
+        return; // rien à insérer
     }
 
-    // Insertion car aucune ligne existante
     $sqlInsert = "INSERT INTO historiquesessioncours 
                   (sigleCours, intituleCours, idEnseignant, creditCours, codeProgramme, anneeAcademique, semestre)
                   VALUES
@@ -143,6 +183,7 @@ function insererSessionCours(PDO $pdo, array $data): void
         ':semestre' => $data['semestre'],
     ]);
 }
+
 
 function inscriptionExiste(PDO $pdo, array $data): bool
 {
@@ -165,8 +206,9 @@ function inscriptionExiste(PDO $pdo, array $data): bool
         ':semestre' => $data['semestre'],
     ]);
 
-    return (bool) $stmt->fetchColumn();
+    return (bool)$stmt->fetchColumn();
 }
+
 
 function recupererInscriptionExistante(PDO $pdo, array $data): array
 {
@@ -192,24 +234,6 @@ function recupererInscriptionExistante(PDO $pdo, array $data): array
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 }
 
-// function donneesIdentiques(array $existantes, array $nouvelles): bool
-// {
-//     $comparaisons = [
-//         'notes' => $existantes['notes'] === $nouvelles['notes'],
-//         'noteRattrapage' => $existantes['noteRattrapage'] === $nouvelles['noteRattrapage'],
-//         'moyenneFinale' => (float) $existantes['moyenneFinale'] === (float) $nouvelles['moyenneFinale'],
-//         'appreciations' => trim((string) $existantes['appreciations']) === trim((string) $nouvelles['appreciations']),
-//         'sanction' => (string) $existantes['sanction'] === (string) $nouvelles['sanction'],
-//     ];
-
-//     foreach ($comparaisons as $champ => $identique) {
-//         error_log("Comparaison $champ : existant = " . var_export($existantes[$champ], true) .
-//             " | nouveau = " . var_export($nouvelles[$champ], true) .
-//             " | identiques = " . ($identique ? "oui" : "non"));
-//     }
-
-//     return !in_array(false, $comparaisons, true);
-// }
 
 function donneesDifferentes(array $existantes, array $nouvelles): array
 {
@@ -218,27 +242,17 @@ function donneesDifferentes(array $existantes, array $nouvelles): array
     if ($existantes['notes'] !== $nouvelles['notes']) {
         $differences[] = 'notes';
     }
-
-    if ((float) $existantes['noteRattrapage'] !== (float) $nouvelles['noteRattrapage']) {
+    if ((float)$existantes['noteRattrapage'] !== (float)$nouvelles['noteRattrapage']) {
         $differences[] = 'note de rattrapage';
     }
-
-    if ((float) $existantes['moyenneFinale'] !== (float) $nouvelles['moyenneFinale']) {
+    if ((float)$existantes['moyenneFinale'] !== (float)$nouvelles['moyenneFinale']) {
         $differences[] = 'moyenne finale';
     }
-
-    if (trim((string) $existantes['appreciations']) !== trim((string) $nouvelles['appreciations'])) {
+    if (trim((string)$existantes['appreciations']) !== trim((string)$nouvelles['appreciations'])) {
         $differences[] = 'appréciations';
     }
-
-    if ((string) $existantes['sanction'] !== (string) $nouvelles['sanction']) {
+    if ((string)$existantes['sanction'] !== (string)$nouvelles['sanction']) {
         $differences[] = 'sanction';
-    }
-
-    foreach (['notes', 'noteRattrapage', 'moyenneFinale', 'appreciations', 'sanction'] as $champ) {
-        error_log("Comparaison $champ : existant = " . var_export($existantes[$champ], true) .
-            " | nouveau = " . var_export($nouvelles[$champ], true) .
-            " | identiques = " . (!in_array($champ, $differences) ? "oui" : "non"));
     }
 
     return $differences;
@@ -254,20 +268,23 @@ function insererInscriptionCours(PDO $pdo, array $data, string $ajoutePar): void
             (:matricule, :nom, :prenoms, :intituleCours, :codeProgramme, :anneeAcademique, :semestre,
              :notes, :noteRattrapage, :moyenneFinale, :appreciations, :sanction, :dateInscription, :ajoutePar)";
 
-    $pdo->prepare($sql)->execute([
-        ':matricule' => $data['matricule'],
-        ':nom' => $data['nom'],
-        ':prenoms' => $data['prenoms'],
-        ':intituleCours' => $data['intituleCours'],
-        ':codeProgramme' => $data['codeProgramme'],
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':matricule'       => $data['matricule'],
+        ':nom'             => $data['nom'],
+        ':prenoms'         => $data['prenoms'],
+        ':intituleCours'   => $data['intituleCours'],
+        ':codeProgramme'   => $data['codeProgramme'],
         ':anneeAcademique' => $data['anneeAcademique'],
-        ':semestre' => $data['semestre'],
-        ':notes' => $data['notes'],
-        ':noteRattrapage' => $data['noteRattrapage'],
-        ':moyenneFinale' => $data['moyenneFinale'],
-        ':appreciations' => $data['appreciations'],
-        ':sanction' => $data['sanction'],
+        ':semestre'        => $data['semestre'],
+        ':notes'           => $data['notes'],
+        ':noteRattrapage'  => $data['noteRattrapage'],
+        ':moyenneFinale'   => $data['moyenneFinale'],
+        ':appreciations'   => $data['appreciations'],
+        ':sanction'        => $data['sanction'],
         ':dateInscription' => $data['dateInscription'],
-        ':ajoutePar' => $ajoutePar
+        ':ajoutePar'       => $ajoutePar,
     ]);
 }
+
+?>

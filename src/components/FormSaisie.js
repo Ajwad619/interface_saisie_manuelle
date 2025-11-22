@@ -1,128 +1,157 @@
 // === IMPORTATIONS ===
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import SectionHistorique from './SectionHistorique';
+import { enregistrerInscription } from '../services/api';
 
 // === COMPOSANT PRINCIPAL ===
 function FormSaisie() {
-  const [showSection2, setShowSection2] = useState(false);
-  const [showSection3, setShowSection3] = useState(false);
-  const [showSoumission, setShowSoumission] = useState(false);
-
+  // === ÉTATS GÉNÉRAUX ===
+  const [showSection2, setShowSection2] = useState(false); // Section Session
+  const [showSection3, setShowSection3] = useState(false); // Section Historique
+  const [showSoumission, setShowSoumission] = useState(false); // bouton Soumission finale
   const [alerte, setAlerte] = useState(null);
-
   const [triggerSoumission, setTriggerSoumission] = useState(false);
 
-  // === TRANSITIONS ===
-  const handleAfterSearch = () => setShowSection2(true);
+  // === ÉTATS POUR TRANSMETTRE LES DONNÉES À SectionHistorique ===
+  const [intituleCours, setIntituleCours] = useState('');
+  const [sigleCours, setSigleCours] = useState('');
+  const [codeProgramme, setCodeProgramme] = useState('');
+  const [anneeAcademique, setAnneeAcademique] = useState('');
+  const [semestre, setSemestre] = useState('');
 
-  const handleAfterValidation = () => {
-    setShowSection2(false);
+  // === FERME L'ALERTE AUTOMATIQUEMENT APRÈS 2s ===
+  useEffect(() => {
+    if (alerte) {
+      const timer = setTimeout(() => setAlerte(null), 2000);
+      return () => clearTimeout(timer); // cleanup si alerte change avant 2s
+    }
+  }, [alerte]);
+
+  // === TRANSITIONS ENTRE LES SECTIONS ===
+  const handleAfterSearch = (coursData) => {
+    // coursData = { intituleCours, sigleCours, codeProgramme }
+    if (coursData) {
+      setIntituleCours(coursData.intituleCours);
+      setSigleCours(coursData.sigleCours);
+    }
+    setShowSection2(true);
+  };
+
+  const handleAfterValidation = (sessionData) => {
+    // sessionData = { anneeAcademique, semestre }
+    if (sessionData) {
+      setAnneeAcademique(sessionData.anneeAcademique);
+      setSemestre(sessionData.semestre);
+      setCodeProgramme(sessionData.codeProgramme || '');
+    }
+    setShowSection2(true);
     setShowSection3(true);
-    setShowSoumission(true);
-  };
-
-  const masquerSection2EtSuivantes = () => {
-    setShowSection2(false);
-    setShowSection3(false);
     setShowSoumission(false);
   };
 
-  const masquerSection3EtSoumission = () => {
-    setShowSection3(false);
-    setShowSoumission(false);
-  };
+  // === SOUMISSION DES DONNÉES FINALES ===
 
-  const masquerSoumission = () => setShowSoumission(false);
-
-  // === SOUMISSION ===
   const handleSoumettre = async (data) => {
     try {
-      const formData = new FormData();
-      Object.keys(data).forEach(key => formData.append(key, data[key]));
+      const result = await enregistrerInscription(data);
 
-      const response = await fetch('traitement_inscription.php', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setAlerte({ message: result.message, type: 'success' });
-      } else {
-        setAlerte({ message: result.message, type: 'danger' });
-      }
-
-    } catch {
-      setAlerte({ message: 'Erreur soumission.', type: 'danger' });
+      return result;
+    } catch (err) {
+     return { success: false, message: "Erreur réseau." };
     }
-  };
+  } ;
+
 
   const declencherSoumission = () => setTriggerSoumission(true);
 
   // === RENDU ===
   return (
     <div className="container mt-4">
-
       <div className="row justify-content-center">
         <div className="col-12 col-lg-10">
 
-          {/* Alerte globale */}
+          {/* === ALERTE GLOBALE === */}
           {alerte && (
             <div className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
               {alerte.message}
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setAlerte(null)}
-              />
+              <button type="button" className="btn-close" onClick={() => setAlerte(null)} />
             </div>
           )}
 
-          <form>
+          {/* === SECTION COURS === */}
+          <SectionCours
+            onAfterSearch={handleAfterSearch}
+            onReinitialiser={() => {
+              setShowSection2(false);
+              setShowSection3(false);
+              setShowSoumission(false);
+              // Reset cours
+              setIntituleCours('');
+              setSigleCours('');
+              setCodeProgramme('');
+            }}
+          />
 
-            {/* SECTION 1 */}
-            <SectionCours
-              onAfterSearch={handleAfterSearch}
-              onReinitialiser={masquerSection2EtSuivantes}
+          {/* === SECTION SESSION === */}
+          <div className={showSection2 ? '' : 'd-none'}>
+            <SectionSession
+              onAfterValidation={handleAfterValidation}
+              onReinitialiser={() => {
+                setShowSection3(false);
+                setShowSoumission(false);
+                // Reset session
+                setAnneeAcademique('');
+                setSemestre('');
+              }}
             />
+          </div>
 
-            {/* SECTION 2 */}
-            <div className={showSection2 ? '' : 'd-none'}>
-              <SectionSession
-                onAfterValidation={handleAfterValidation}
-                onReinitialiser={masquerSection3EtSoumission}
-              />
-            </div>
+          {/* === SECTION HISTORIQUE === */}
+          <div className={showSection3 ? '' : 'd-none'}>
+            <SectionHistorique
+              onSoumettre={enregistrerInscription}
+              triggerSoumission={triggerSoumission}
+              setTriggerSoumission={setTriggerSoumission}
+              onToggleSoumission={setShowSoumission}
+              intituleCours={intituleCours}
+              sigleCours={sigleCours}
+              codeProgramme={codeProgramme}
+              anneeAcademique={anneeAcademique}
+              semestre={semestre}
+            />
+          </div>
 
-            {/* SECTION 3 */}
-            <div className={showSection3 ? '' : 'd-none'}>
-              <SectionHistorique
-                onSoumettre={handleSoumettre}
-                onReinitialiser={masquerSoumission}
-                triggerSoumission={triggerSoumission}
-                setTriggerSoumission={setTriggerSoumission}
-              />
-            </div>
-
-            {/* BOUTON FINAL */}
-            <div className={`text-center mb-5 ${showSoumission ? '' : 'd-none'}`}>
+          {/* === BOUTON SOUMISSION FINALE === */}
+          {showSoumission && (
+            <div className="text-center mb-5">
               <button
                 type="button"
                 className="btn btn-success btn-lg w-50"
-                id="soumissionFinale"
                 onClick={declencherSoumission}
               >
                 Soumission finale
               </button>
             </div>
-
-          </form>
+          )}
 
         </div>
       </div>
+
+      {/* === ALERTE FLOTTANTE BAS DROITE === */}
+      {alerte && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: 1050,
+          minWidth: '250px'
+        }} className={`alert alert-${alerte.type} alert-dismissible fade show`}>
+          {alerte.message}
+          <button type="button" className="btn-close" onClick={() => setAlerte(null)} />
+        </div>
+      )}
 
     </div>
   );

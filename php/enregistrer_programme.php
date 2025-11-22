@@ -1,18 +1,28 @@
 <?php
+// === HEADERS CORS ===
+header("Access-Control-Allow-Origin: http://localhost:3000"); // ton front
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
 
-    header("Access-Control-Allow-Origin: http://localhost:3000"); // ✅ origine exacte
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Access-Control-Allow-Credentials: true");
-header('Content-Type: application/json');
+// === Gérer la requête OPTIONS pour le preflight ===
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require_once __DIR__ . '/utils.php';
 $fichier = __DIR__ . '/data/programmes.json';
 
-// Récupération sécurisée des données POST
-$code = trim($_POST['code'] ?? '');
-$titre = trim($_POST['titre'] ?? '');
-$niveau = trim($_POST['niveau'] ?? '');
+// === Lire le JSON POST ===
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
+$code = trim($data['code'] ?? '');
+$titre = trim($data['titre'] ?? '');
+$niveau = trim($data['niveau'] ?? '');
+
+// Validation
 if ($code === '' || $titre === '' || $niveau === '') {
     http_response_code(400);
     envoyerReponse('Tous les champs (code, titre, niveau) sont obligatoires.', false);
@@ -24,10 +34,7 @@ $programmes = [];
 if (file_exists($fichier)) {
     $contenu = file_get_contents($fichier);
     $programmes = json_decode($contenu, true);
-    if (!is_array($programmes)) {
-        // Fichier JSON corrompu ou vide => réinitialiser
-        $programmes = [];
-    }
+    if (!is_array($programmes)) $programmes = [];
 }
 
 // Vérifier doublon code (sans casse)
@@ -53,4 +60,5 @@ if (file_put_contents($fichier, json_encode($programmes, JSON_PRETTY_PRINT | JSO
     exit;
 }
 
-envoyerReponse('Programme ajouté avec succès.', true);
+// Succès
+envoyerReponse('Programme ajouté avec succès.', true, ['nouveauProgramme' => end($programmes)]);

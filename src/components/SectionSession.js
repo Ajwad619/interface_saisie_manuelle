@@ -1,8 +1,8 @@
 // === IMPORTATIONS ===
-// React et useState pour créer le composant et gérer les boîtes
 import React, { useState, useEffect } from 'react';
 // enregistrerProgramme pour sauvegarder un nouveau programme.
 import { enregistrerProgramme } from '../services/api';
+import { getProgramme } from '../services/api';
 
 // Fonction utilitaire pour valider l'année académique
 function validerAnnee(annee) {
@@ -39,11 +39,12 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
 
   // === CHARGER LES PROGRAMMES AU DÉMARRAGE ===
   useEffect(() => {
-    fetch('/data/programmes.json')
-      .then(response => response.json())
-      .then(data => setProgrammes(data))
-      .catch(console.error);
-  }, []);
+   getProgramme()
+     .then(data => setProgrammes(data))
+     .catch(err => console.error(err));
+  } , []);
+
+
 
   // === FONCTIONS POUR LES BOUTONS ===
   const handleAfficherMiniForm = () => {
@@ -60,27 +61,32 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
   // Sauvegarder le nouveau programme
   const handleSauvegarderCreation = async () => {
     if (!nouveauCode || !nouveauTitre || !nouveauNiveau) {
-      setAlerte({ message: 'Tous champs requis.', type: 'warning' });
+      setAlerte({ message: 'Tous les champs sont requis.', type: 'warning' });
       return;
     }
+
     try {
-      const result = await enregistrerProgramme({
+      const data = await enregistrerProgramme({
         code: nouveauCode,
         titre: nouveauTitre,
         niveau: nouveauNiveau
       });
 
-      if (result.success) {
-        setProgrammes([...programmes, result.nouveauProgramme]);
+      if (data.success) {
+        // Ajouter le nouveau programme localement
+        setProgrammes(prev => [...prev, data.nouveauProgramme]);
         setShowMiniForm(false);
-        setAlerte({ message: 'Programme ajouté !', type: 'success' });
+        setAlerte({ message: 'Programme ajouté avec succès !', type: 'success' });
       } else {
-        setAlerte({ message: result.message, type: 'danger' });
+        setAlerte({ message: data.message, type: 'danger' });
       }
+
     } catch (error) {
-      setAlerte({ message: 'Erreur sauvegarde.', type: 'danger' });
+      console.error(error);
+      setAlerte({ message: "Erreur de communication avec le serveur.", type: 'danger' });
     }
   };
+
 
   // Validation complète
   const handleValider = () => {
@@ -110,7 +116,11 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
     setErreurs(nouvellesErreurs);
 
     if (Object.keys(nouvellesErreurs).length === 0) {
-      if (onAfterValidation) onAfterValidation();
+      if (onAfterValidation) onAfterValidation({
+        anneeAcademique,
+        semestre,
+        codeProgramme,
+      });
     }
   };
 

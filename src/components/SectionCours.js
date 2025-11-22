@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { rechercherCours } from '../services/api';
+import { ajouterCours } from '../services/api';
 
 // === Petite alerte réutilisable ===
 function Alerte({ message, type, onClose }) {
@@ -63,8 +64,13 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
     setIntituleCours(intitule);
     setShowTable(false);
     setCoursChoisi(true);
-    if (onAfterSearch) onAfterSearch();
+
+    if (onAfterSearch) onAfterSearch({
+      intituleCours: intitule,
+      sigleCours: sigle,
+    });
   };
+
 
   const handleAjouterCours = async () => {
     if (!sigleCours.trim() || !intituleCours.trim()) {
@@ -73,27 +79,25 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
     }
 
     try {
-      const response = await fetch('/enregistrer_cours.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sigle: sigleCours, intitule: intituleCours }),
+      const result = await ajouterCours({
+        sigle: sigleCours,
+        intitule: intituleCours
       });
-
-      const result = await response.json();
 
       if (result.success) {
         setAlerte({ message: 'Cours ajouté !', type: 'success' });
         setCoursChoisi(true);
         if (onAfterSearch) onAfterSearch();
-
       } else {
         setAlerte({ message: result.message, type: 'danger' });
       }
 
     } catch (error) {
-      setAlerte({ message: 'Erreur ajout.', type: 'danger' });
+      setAlerte({ message: 'Erreur lors de l’ajout du cours.', type: 'danger' });
+      console.error(error);
     }
-  };
+  };  
+
 
   return (
     <div className="form-section mt-4">

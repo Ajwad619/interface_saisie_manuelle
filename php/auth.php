@@ -1,10 +1,15 @@
 <?php
 
+session_set_cookie_params([
+    'samesite' => 'None',
+    'secure' => false // mettre true uniquement si ton site est en https
+]);
+
+session_start();
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
-
-session_start();
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/utils.php';
