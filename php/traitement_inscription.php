@@ -41,11 +41,11 @@ try {
     // -------------------------------------------------------------
     // 4) VÉRIFIER QUE L’UTILISATEUR EST CONNECTÉ
     // -------------------------------------------------------------
-    /*$ajoutePar = $_SESSION['user_id'] ?? null;
+    $ajoutePar = $_SESSION['user_id'] ?? null;
 
     if (!$ajoutePar) {
         envoyerReponse("Erreur : utilisateur non authentifié.", false);
-    }*/
+    }
 
     // Connexion DB
     $pdo = getDatabaseConnection('temp');
