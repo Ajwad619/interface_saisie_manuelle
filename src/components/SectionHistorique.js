@@ -1,19 +1,19 @@
 // SectionHistorique.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { rechercherEtudiants } from '../services/api';
-// NOTE : on n'importe plus `enregistrerInscription` ici — on utilise la prop `onSoumettre`
 
 function SectionHistorique({
   onSoumettre,
   triggerSoumission,
   setTriggerSoumission,
   onToggleSoumission,
-  // ces valeurs doivent être fournies par FormSaisie (provenant de SectionCours / SectionSession)
   intituleCours,
   sigleCours,
   codeProgramme,
   anneeAcademique,
+  creditCours,
   semestre,
+  idEnseignant
 }) {
   // === ÉTATS ===
   const [rechercheMatricule, setRechercheMatricule] = useState('');
@@ -39,7 +39,9 @@ function SectionHistorique({
     sigleCours,
     codeProgramme,
     anneeAcademique,
-    semestre
+    creditCours,
+    semestre,
+    idEnseignant
   });
 
   const totalPourcentages = evaluations.reduce(
@@ -103,9 +105,7 @@ function SectionHistorique({
     setShowSectionResultats(false);
     setAlerte(null);
 
-    // prévenir parent que le bouton final doit être caché
     if (typeof onToggleSoumission === 'function') onToggleSoumission(false);
-    // si parent a fourni `onSoumettre` / `onReinitialiser` il gèrera le reste
   }, [onToggleSoumission]);
 
   // === ÉVALUATIONS ===
@@ -126,7 +126,15 @@ function SectionHistorique({
   const handleSoumettre = useCallback(async () => {
     setAlerte(null);
 
-    // validations minimales (moyenne & sanction seulement, évaluations optionnelles)
+    // Vérification total des pourcentages 
+    if (evaluations.length > 0 && totalPourcentages !== 100) {
+      return setAlerte({
+        message: "Le total des pourcentages doit faire 100%.",
+        type: "danger",
+      });
+    }
+
+    // validations minimales 
     if (!moyenneFinale || isNaN(parseFloat(moyenneFinale)) || parseFloat(moyenneFinale) < 0 || parseFloat(moyenneFinale) > 20) {
       setAlerte({ message: 'Moyenne finale invalide.', type: 'danger' });
       return { success: false, message: 'Moyenne finale invalide.' };
@@ -136,7 +144,7 @@ function SectionHistorique({
       return { success: false, message: 'Sanction manquante.' };
     }
 
-    // vérifier que les données de cours/session sont présentes (proviennent du parent)
+    // vérifier que les données de cours/session sont présentes 
     if (!intituleCours || !sigleCours || !codeProgramme || !anneeAcademique || !semestre) {
       setAlerte({ message: "Erreur : informations du cours/session manquantes.", type: 'danger' });
       return { success: false, message: "Données cours/session manquantes" };
@@ -150,6 +158,8 @@ function SectionHistorique({
       sigleCours,
       codeProgramme,
       anneeAcademique,
+      creditCours,
+      idEnseignant,
       semestre,
       notes: evaluations
         .filter(e => e.intitule && e.pourcentage && e.note)
@@ -189,7 +199,7 @@ function SectionHistorique({
     }
   }, [
     matricule, nom, prenoms,
-    intituleCours, sigleCours, codeProgramme, anneeAcademique, semestre,
+    intituleCours, sigleCours, codeProgramme, anneeAcademique, semestre, creditCours, idEnseignant,
     evaluations, noteRattrapage, moyenneFinale, appreciation, sanction,
     onSoumettre, handleReinitialiserLocal, onToggleSoumission
   ]);
@@ -197,7 +207,7 @@ function SectionHistorique({
   // déclenchement via triggerSoumission (bouton "Soumission finale" dans le parent)
   useEffect(() => {
     if (triggerSoumission) {
-      // appeler la fonction (elle renvoie un résultat)
+
       (async () => {
         await handleSoumettre();
         // indiquer au parent que la requête a été consommée

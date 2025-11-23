@@ -1,6 +1,5 @@
 // === IMPORTATIONS ===
 import React, { useState, useEffect } from 'react';
-// enregistrerProgramme pour sauvegarder un nouveau programme.
 import { enregistrerProgramme } from '../services/api';
 import { getProgramme } from '../services/api';
 
@@ -119,7 +118,9 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
       if (onAfterValidation) onAfterValidation({
         anneeAcademique,
         semestre,
+        creditCours,
         codeProgramme,
+        idEnseignant: idEnseignant.trim() === "" ? null : idEnseignant.trim(),
       });
     }
   };

@@ -1,62 +1,113 @@
 <?php
 
+// === CORS / HEADERS ===
 header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Pragma: no-cache");
+header("Content-Type: application/json; charset=utf-8");
 
+// === INCLUDES & CONFIG ===
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/utils.php';
 
-/*ini_set('display_errors', 0); // important : rien n'est affiché
+ini_set('display_errors', 0); // ne pas exposer d'erreur côté client
 ini_set('log_errors', 1);
-error_reporting(E_ALL);*/
+error_reporting(E_ALL);
 
-session_start();
+// === PRÉ-VOL CORS ===
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Répondre proprement au préflight
+    http_response_code(204);
+    exit;
+}
 
-var_dump($_SESSION);
-exit;
+// === SESSION ===
+if (session_status() === PHP_SESSION_NONE) {
+    // Paramètres cookies si besoin (adapter secure/samesite si HTTPS)
+    session_set_cookie_params([
+        'samesite' => 'None',
+        'secure' => false
+    ]);
+    session_start();
+}
+
+// Empêcher toute sortie accidentelle
+ob_start();
+
 
 try {
     // -------------------------------------------------------------
-    // 1) LIRE LE JSON ENVOYÉ PAR REACT VIA api.js
+    // 1) LIRE LES DONNÉES ENTRANTES (supporte FormData via $_POST ou JSON brut)
     // -------------------------------------------------------------
-    $raw = file_get_contents("php://input");
-    $postData = json_decode($raw, true);
+    $rawPost = $_POST;
+    $inputFromJson = null;
 
-    if (!$postData) {
-        envoyerReponse("Erreur : données JSON invalides ou vides.", false);
+    if (!empty($rawPost)) {
+        // FormData envoyé par fetch avec FormData => les valeurs sont dans $_POST
+        $incoming = $rawPost;
+    } else {
+        // Peut être JSON envoyé directement (fetch JSON)
+        $raw = file_get_contents("php://input");
+        if ($raw !== false && trim($raw) !== '') {
+            $decoded = json_decode($raw, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $inputFromJson = $decoded;
+                $incoming = $decoded;
+            } else {
+                // JSON invalide -> on laisse incoming null et on répondra
+                error_log("traitement_inscription.php : JSON invalide reçu : " . json_last_error_msg());
+                envoyerReponse("Erreur : données JSON invalides ou vides.", false);
+            }
+        } else {
+            $incoming = [];
+        }
     }
 
     // -------------------------------------------------------------
-    // 2) EXTRAIRE LES DONNÉES
+    // 2) EXTRAIRE LES DONNÉES (ton format attendu)
     // -------------------------------------------------------------
-    $data = extraireDonnees($postData);
+    // Fonction extraireDonnees attend un array associatif.
+    $data = extraireDonnees(is_array($incoming) ? $incoming : []);
 
     // -------------------------------------------------------------
-    // 3) VALIDATION DES CHAMPS REQUIS
+    // 3) VALIDATION DES CHAMPS REQUIS (intituleCours, codeProgramme, anneeAcademique, semestre, sanction)
     // -------------------------------------------------------------
     validerDonnees($data);
 
     // -------------------------------------------------------------
-    // 4) VÉRIFIER QUE L’UTILISATEUR EST CONNECTÉ
+    // 4) VÉRIFIER QUE L’UTILISATEUR EST CONNECTÉ (session)
     // -------------------------------------------------------------
     $ajoutePar = $_SESSION['user_id'] ?? null;
+
+    // Mode développement : si la requête vient de localhost et qu'aucune session n'existe,
+    // on peut initialiser une session dev pour faciliter les tests (optionnel).
+    $remote = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (!$ajoutePar && in_array($remote, ['127.0.0.1', '::1', '::ffff:127.0.0.1'])) {
+        // mode dev : créer une session "dev" si tu veux
+        $_SESSION['user_id'] = 'dev';
+        $ajoutePar = 'dev';
+        error_log("traitement_inscription.php : mode dev, session user_id=dev initialisée");
+    }
 
     if (!$ajoutePar) {
         envoyerReponse("Erreur : utilisateur non authentifié.", false);
     }
 
-    // Connexion DB
+    // -------------------------------------------------------------
+    // 5) CONNEXION DB
+    // -------------------------------------------------------------
     $pdo = getDatabaseConnection('temp');
 
     // -------------------------------------------------------------
-    // 5) INSERER OU COMPARER LA SESSION DE COURS
+    // 6) INSERER OU COMPARER LA SESSION DE COURS
     // -------------------------------------------------------------
     insererSessionCours($pdo, $data);
 
     // -------------------------------------------------------------
-    // 6) VÉRIFIER SI L’INSCRIPTION EXISTE JÀ
+    // 7) VÉRIFIER SI L’INSCRIPTION EXISTE DÉJÀ
     // -------------------------------------------------------------
     if (inscriptionExiste($pdo, $data)) {
         $existantes = recupererInscriptionExistante($pdo, $data);
@@ -74,15 +125,21 @@ try {
     }
 
     // -------------------------------------------------------------
-    // 7) INSÉRER L’INSCRIPTION
+    // 8) INSÉRER L’INSCRIPTION
     // -------------------------------------------------------------
     insererInscriptionCours($pdo, $data, $ajoutePar);
 
+    // Flush buffers éventuels et renvoyer la réponse JSON
+    ob_end_clean();
     envoyerReponse("Inscription enregistrée avec succès.");
 
 } catch (PDOException $e) {
+    ob_end_clean();
+    error_log("traitement_inscription.php - PDOException: " . $e->getMessage());
     envoyerReponse("Erreur PDO : " . $e->getMessage(), false);
 } catch (Exception $e) {
+    ob_end_clean();
+    error_log("traitement_inscription.php - Exception: " . $e->getMessage());
     envoyerReponse("Erreur serveur : " . $e->getMessage(), false);
 }
 

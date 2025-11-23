@@ -1,5 +1,5 @@
-// Ceci est comme une boîte aux lettres. Chaque fonction est une lettre que React envoie à ton PHP.
-const API_BASE_URL = 'http://localhost:8005'; // Adresse de ton backend PHP local
+// Ceci est comme une boîte aux lettres. Chaque fonction est une lettre que React envoie au PHP.
+const API_BASE_URL = 'http://localhost:8005'; 
 
 // ------------------------
 // Fonction pour se connecter (lettre à auth.php)
@@ -32,7 +32,7 @@ export async function rechercherCours(criteres) {
 }
 
 // ------------------------
-// Fonction pour rechercher des cours par query simple (ancienne version, renommée pour éviter doublon)
+// Fonction pour rechercher des cours par query simple 
 // ------------------------
 export async function rechercherCoursParQuery(query) {
   try {

@@ -45,7 +45,7 @@
     },
     {
         "code": "MR- PTA",
-        "titre": "Master e Physique Théorique et Applications"
+        "titre": "Master en Physique Théorique et Applications"
     },
     {
         "code": "DOC-PTA",
@@ -58,20 +58,5 @@
     {
         "code": "DOC-ROP",
         "titre": "Doctorat en Recherche Opérationnelle"
-    },
-    {
-        "code": "AZER",
-        "titre": "AZERTYUIOP",
-        "niveau": "1"
-    },
-    {
-        "code": "qsf",
-        "titre": "qsdfghjk",
-        "niveau": "1"
-    },
-    {
-        "code": "qswx",
-        "titre": "wxcvbnbn",
-        "niveau": "1"
     }
 ]

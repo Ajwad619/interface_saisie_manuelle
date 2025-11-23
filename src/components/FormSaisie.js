@@ -20,18 +20,19 @@ function FormSaisie() {
   const [codeProgramme, setCodeProgramme] = useState('');
   const [anneeAcademique, setAnneeAcademique] = useState('');
   const [semestre, setSemestre] = useState('');
+  const [creditCours, setCreditCours] = useState(0);
+  const [idEnseignant, setIdEnseignant] = useState('');
 
-  // === FERME L'ALERTE AUTOMATIQUEMENT APRÈS 2s ===
+  // === FERME L'ALERTE AUTOMATIQUEMENT ===
   useEffect(() => {
     if (alerte) {
-      const timer = setTimeout(() => setAlerte(null), 2000);
-      return () => clearTimeout(timer); // cleanup si alerte change avant 2s
+      const timer = setTimeout(() => setAlerte(null), 3500);
+      return () => clearTimeout(timer); 
     }
   }, [alerte]);
 
   // === TRANSITIONS ENTRE LES SECTIONS ===
   const handleAfterSearch = (coursData) => {
-    // coursData = { intituleCours, sigleCours, codeProgramme }
     if (coursData) {
       setIntituleCours(coursData.intituleCours);
       setSigleCours(coursData.sigleCours);
@@ -40,11 +41,12 @@ function FormSaisie() {
   };
 
   const handleAfterValidation = (sessionData) => {
-    // sessionData = { anneeAcademique, semestre }
     if (sessionData) {
       setAnneeAcademique(sessionData.anneeAcademique);
       setSemestre(sessionData.semestre);
       setCodeProgramme(sessionData.codeProgramme || '');
+      setCreditCours(sessionData.creditCours);
+      setIdEnseignant(sessionData.idEnseignant);
     }
     setShowSection2(true);
     setShowSection3(true);
@@ -56,10 +58,16 @@ function FormSaisie() {
   const handleSoumettre = async (data) => {
     try {
       const result = await enregistrerInscription(data);
+      if (result.success) {
+        setAlerte({ type: "success", message: result.message || "Soumission réussie !" });
+      } else {
+        setAlerte({ type: "danger", message: result.message || "Erreur lors de la soumission." });
+      }
 
       return result;
     } catch (err) {
-     return { success: false, message: "Erreur réseau." };
+      setAlerte({ type: "danger", message: "Erreur réseau lors de la soumission." });
+      return { success: false, message: "Erreur réseau." };
     }
   } ;
 
@@ -90,7 +98,6 @@ function FormSaisie() {
               // Reset cours
               setIntituleCours('');
               setSigleCours('');
-              setCodeProgramme('');
             }}
           />
 
@@ -102,8 +109,11 @@ function FormSaisie() {
                 setShowSection3(false);
                 setShowSoumission(false);
                 // Reset session
+                setCodeProgramme('');
                 setAnneeAcademique('');
                 setSemestre('');
+                setCreditCours(0);
+                setIdEnseignant('');
               }}
             />
           </div>
@@ -111,7 +121,7 @@ function FormSaisie() {
           {/* === SECTION HISTORIQUE === */}
           <div className={showSection3 ? '' : 'd-none'}>
             <SectionHistorique
-              onSoumettre={enregistrerInscription}
+              onSoumettre={handleSoumettre}
               triggerSoumission={triggerSoumission}
               setTriggerSoumission={setTriggerSoumission}
               onToggleSoumission={setShowSoumission}
@@ -120,6 +130,8 @@ function FormSaisie() {
               codeProgramme={codeProgramme}
               anneeAcademique={anneeAcademique}
               semestre={semestre}
+              creditCours={creditCours}
+              idEnseignant={idEnseignant}
             />
           </div>
 
@@ -139,7 +151,7 @@ function FormSaisie() {
         </div>
       </div>
 
-      {/* === ALERTE FLOTTANTE BAS DROITE === */}
+      {/* === ALERTE FLOTTANTE === */}
       {alerte && (
         <div style={{
           position: 'fixed',
