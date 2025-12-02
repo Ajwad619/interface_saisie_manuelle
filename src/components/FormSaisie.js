@@ -13,6 +13,7 @@ function FormSaisie() {
   const [showSoumission, setShowSoumission] = useState(false); // bouton Soumission finale
   const [alerte, setAlerte] = useState(null);
   const [triggerSoumission, setTriggerSoumission] = useState(false);
+  const [sessionVerouillee, setSessionVerouillee] = useState(false);
 
   // === ÉTATS POUR TRANSMETTRE LES DONNÉES À SectionHistorique ===
   const [intituleCours, setIntituleCours] = useState('');
@@ -48,6 +49,7 @@ function FormSaisie() {
       setCreditCours(sessionData.creditCours);
       setIdEnseignant(sessionData.idEnseignant);
     }
+    setSessionVerouillee(true);
     setShowSection2(true);
     setShowSection3(true);
     setShowSoumission(false);
@@ -115,6 +117,7 @@ function FormSaisie() {
                 setCreditCours(0);
                 setIdEnseignant('');
               }}
+              sessionVerouillee={sessionVerouillee} 
             />
           </div>
 

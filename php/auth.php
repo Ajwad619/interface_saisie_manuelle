@@ -20,14 +20,14 @@ error_log("Méthode HTTP: " . $_SERVER['REQUEST_METHOD']);
 error_log("Session actuelle: " . json_encode($_SESSION));
 
 // --- Mode développement ---
-if (in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
+/*if (in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['user_id'] = 'admin';
         error_log("Mode dev : session initialisée avec user_id=admin");
     }
     envoyerReponse("Mode développement : connexion simulée", true);
     exit;
-}
+}*/
 
 try {
     $pdo = getDatabaseConnection('temp');

@@ -224,6 +224,8 @@ function SectionHistorique({
     }
   }, [etudiantChoisi, moyenneFinale, sanction, onToggleSoumission]);
 
+  console.log("Etat actuel etudiantChoisi =", etudiantChoisi);
+
   // === RENDU ===
   return (
     <div className="form-section">
@@ -276,7 +278,7 @@ function SectionHistorique({
           </div>
         </div>
       </div>
-
+      
       {/* Tableau étudiants */}
       {showTableEtudiants && (
         <table className="table table-striped mb-4">
@@ -295,12 +297,14 @@ function SectionHistorique({
                 <td>{e.nom}</td>
                 <td>{e.prenoms}</td>
                 <td>
-                  <button
-                    className="btn btn-success btn-sm"
-                    onClick={() => handleChoisirEtudiant(e)}
-                  >
-                    Choisir
-                  </button>
+                  {! etudiantChoisi && (
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => handleChoisirEtudiant(e)}
+                    >
+                      Choisir
+                    </button>
+                  )}
                 </td>
               </tr>
             )) : (
@@ -418,5 +422,4 @@ function SectionHistorique({
     </div>
   );
 }
-
 export default SectionHistorique;

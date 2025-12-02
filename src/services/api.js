@@ -171,7 +171,13 @@ export async function enregistrerInscription(data) {
       credentials: "include"
     });
 
-    return await response.json();
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error('Réponse non JSON reçue :', text);
+      return { success: false, message: 'Réponse serveur invalide', raw: text };
+    }
   } catch (error) {
     console.error(error);
     return { success: false, message: error.message };

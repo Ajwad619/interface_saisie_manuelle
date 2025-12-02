@@ -24,8 +24,7 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
   const [resultats, setResultats] = useState([]);
   const [alerte, setAlerte] = useState(null);
   const [coursChoisi, setCoursChoisi] = useState(false);
-  const [rechercheLancee, setRechercheLancee] = useState(false);
-
+  
   const handleRechercher = async () => {
     if (!sigleCours.trim() && !intituleCours.trim()) {
       setAlerte({ message: 'Veuillez remplir au moins un champ de recherche.', type: 'warning' });
@@ -41,7 +40,6 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
 
       setResultats(data);
       setShowTable(true);
-      setRechercheLancee(true);
 
     } catch (error) {
       setAlerte({ message: "Erreur de communication avec le serveur.", type: 'danger' });
@@ -53,10 +51,9 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
     setSigleCours('');
     setIntituleCours('');
     setShowTable(false);
-    setResultats([]);
-    setCoursChoisi(false);
-    setRechercheLancee(false);
+    setResultats([]); 
     if (onReinitialiser) onReinitialiser();
+    setCoursChoisi(false); 
   };
 
   const handleChoisir = (sigle, intitule) => {
@@ -136,9 +133,9 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
         </div>
 
         <div className="col-md-12 text-start mt-3">
-          <button type="button" className="btn btn-primary mx-2" onClick={handleRechercher}>
+          {!coursChoisi && (<button type="button" className="btn btn-primary mx-2" onClick={handleRechercher}>
             Rechercher
-          </button>
+          </button>)}
           <button type="button" className="btn btn-secondary mx-2" onClick={handleReinitialiser}>
             Réinitialiser
           </button>

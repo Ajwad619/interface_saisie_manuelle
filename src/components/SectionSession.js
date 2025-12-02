@@ -29,6 +29,8 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
   const [nouveauCode, setNouveauCode] = useState('');  
   const [nouveauTitre, setNouveauTitre] = useState('');
   const [nouveauNiveau, setNouveauNiveau] = useState('');
+  const [sessionVerouillee, setSessionVerouillee] = useState(false);
+  const [sessionRemplie, setSessionRemplie] = useState(false);
 
   // États pour les erreurs
   const [erreurs, setErreurs] = useState({});
@@ -123,6 +125,27 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
         idEnseignant: idEnseignant.trim() === "" ? null : idEnseignant.trim(),
       });
     }
+
+    setSessionVerouillee(true);
+    setSessionRemplie(true);
+  };
+
+  //Réinitialiser
+  const handleReinitialiser = () => {
+    setAnneeAcademique('');
+    setSemestre('');
+    setCreditCours('');
+    setCodeProgramme('');
+    setIdEnseignant('');
+    setShowMiniForm(false);
+    setNouveauCode('');
+    setNouveauTitre('');
+    setNouveauNiveau('');
+    setErreurs({});
+    setAlerte(null);
+    setSessionVerouillee(false);
+    if (onReinitialiser) onReinitialiser(); 
+    setSessionRemplie(false);
   };
 
   // Surbrillance rouge
@@ -154,6 +177,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             className={classInput("anneeAcademique")}
             value={anneeAcademique}
             onChange={(e) => setAnneeAcademique(e.target.value)}
+            disabled={sessionVerouillee}
             placeholder="ex : 23-24"
             required
           />
@@ -172,6 +196,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             id="semestre"
             value={semestre}
             onChange={(e) => setSemestre(e.target.value)}
+            disabled={sessionVerouillee}
             required
           >
             <option value="">-- Sélectionner --</option>
@@ -193,6 +218,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             className={classInput("creditCours")}
             value={creditCours}
             onChange={(e) => setCreditCours(e.target.value)}
+            disabled={sessionVerouillee}
             min="0"
             max="15"
             required
@@ -210,6 +236,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             id="codeProgramme"
             value={codeProgramme}
             onChange={(e) => setCodeProgramme(e.target.value)}
+            disabled={sessionVerouillee}
             required
           >
             <option value="">-- Sélectionner --</option>
@@ -230,6 +257,7 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
             className={classInput("idEnseignant")}
             value={idEnseignant}
             onChange={(e) => setIdEnseignant(e.target.value)}
+            readOnly={sessionVerouillee}
           />
           {erreurs.idEnseignant && <div className="invalid-feedback">{erreurs.idEnseignant}</div>}
         </div>
@@ -310,30 +338,19 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
 
         {/* Boutons finaux */}
         <div className="col-md-6 mt-4">
-          <button
+          {!sessionVerouillee && !sessionRemplie && (<button
             type="button"
             id="validerSessionCours"
             className="btn btn-primary"
             onClick={handleValider}
           >
             Continuer
-          </button>
+          </button>)}
           <button
             type="button"
             className="btn btn-secondary ms-3 align-items-center"
             onClick={() => {
-              setAnneeAcademique('');
-              setSemestre('');
-              setCreditCours('');
-              setCodeProgramme('');
-              setIdEnseignant('');
-              setShowMiniForm(false);
-              setNouveauCode('');
-              setNouveauTitre('');
-              setNouveauNiveau('');
-              setErreurs({});
-              setAlerte(null);
-              if (onReinitialiser) onReinitialiser();
+              handleReinitialiser();
             }}
           >
             Réinitialiser
