@@ -1,8 +1,8 @@
 // SectionHistorique.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { rechercherEtudiants } from '../services/api';
 
-function SectionHistorique({
+const SectionHistorique = forwardRef(({
   onSoumettre,
   triggerSoumission,
   setTriggerSoumission,
@@ -14,7 +14,8 @@ function SectionHistorique({
   creditCours,
   semestre,
   idEnseignant
-}) {
+}, ref) => {
+
   // === ÉTATS ===
   const [rechercheMatricule, setRechercheMatricule] = useState('');
   const [rechercheNom, setRechercheNom] = useState('');
@@ -108,6 +109,10 @@ function SectionHistorique({
     if (typeof onToggleSoumission === 'function') onToggleSoumission(false);
   }, [onToggleSoumission]);
 
+  useImperativeHandle(ref, () => ({
+    handleReinitialiserLocal
+  }));
+
   // === ÉVALUATIONS ===
   const ajouterEvaluation = () => {
     setEvaluations(prev => [...prev, { id: Date.now(), intitule: '', pourcentage: '', note: '' }]);
@@ -200,7 +205,7 @@ function SectionHistorique({
   }, [
     matricule, nom, prenoms,
     intituleCours, sigleCours, codeProgramme, anneeAcademique, semestre, creditCours, idEnseignant,
-    evaluations, noteRattrapage, moyenneFinale, appreciation, sanction,
+    evaluations, noteRattrapage, moyenneFinale, appreciation, sanction, totalPourcentages,
     onSoumettre, handleReinitialiserLocal, onToggleSoumission
   ]);
 
@@ -224,7 +229,9 @@ function SectionHistorique({
     }
   }, [etudiantChoisi, moyenneFinale, sanction, onToggleSoumission]);
 
-  console.log("Etat actuel etudiantChoisi =", etudiantChoisi);
+
+  console.log("Etat actuel etudiantChoisi =", etudiantChoisi) ;
+  /*console.log("Etat du setter =", setEtudiantChoisi());*/
 
   // === RENDU ===
   return (
@@ -297,7 +304,7 @@ function SectionHistorique({
                 <td>{e.nom}</td>
                 <td>{e.prenoms}</td>
                 <td>
-                  {! etudiantChoisi && (
+                  {! (etudiantChoisi) && (
                     <button
                       className="btn btn-success btn-sm"
                       onClick={() => handleChoisirEtudiant(e)}
@@ -421,5 +428,5 @@ function SectionHistorique({
       )}
     </div>
   );
-}
+})
 export default SectionHistorique;

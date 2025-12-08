@@ -17,7 +17,7 @@ function validerNomEnseignant(nom) {
 }
 
 // === COMPOSANT SECTION SESSION ===
-function SectionSession({ onAfterValidation , onReinitialiser }) {
+function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouillee }) {
   // === ÉTATS AVEC useState ===
   const [anneeAcademique, setAnneeAcademique] = useState('');  
   const [semestre, setSemestre] = useState(''); 
@@ -29,7 +29,6 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
   const [nouveauCode, setNouveauCode] = useState('');  
   const [nouveauTitre, setNouveauTitre] = useState('');
   const [nouveauNiveau, setNouveauNiveau] = useState('');
-  const [sessionVerouillee, setSessionVerouillee] = useState(false);
   const [sessionRemplie, setSessionRemplie] = useState(false);
 
   // États pour les erreurs
@@ -126,12 +125,18 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
       });
     }
 
-    setSessionVerouillee(true);
     setSessionRemplie(true);
   };
 
   //Réinitialiser
   const handleReinitialiser = () => {
+    if (onReinitialiser) onReinitialiser(); 
+    setSessionRemplie(false);
+  };
+
+  useEffect(() => {
+  if (!sessionVerouillee) {
+    // le parent demande un reset => on reset local
     setAnneeAcademique('');
     setSemestre('');
     setCreditCours('');
@@ -143,10 +148,10 @@ function SectionSession({ onAfterValidation , onReinitialiser }) {
     setNouveauNiveau('');
     setErreurs({});
     setAlerte(null);
-    setSessionVerouillee(false);
-    if (onReinitialiser) onReinitialiser(); 
     setSessionRemplie(false);
-  };
+  }
+}, [sessionVerouillee]);
+
 
   // Surbrillance rouge
   const classInput = (field) =>

@@ -1,5 +1,5 @@
 // === IMPORTATIONS ===
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,  useRef } from 'react';
 import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import SectionHistorique from './SectionHistorique';
@@ -14,6 +14,7 @@ function FormSaisie() {
   const [alerte, setAlerte] = useState(null);
   const [triggerSoumission, setTriggerSoumission] = useState(false);
   const [sessionVerouillee, setSessionVerouillee] = useState(false);
+  const historiqueRef = useRef(null);
 
   // === ÉTATS POUR TRANSMETTRE LES DONNÉES À SectionHistorique ===
   const [intituleCours, setIntituleCours] = useState('');
@@ -32,6 +33,7 @@ function FormSaisie() {
     }
   }, [alerte]);
 
+
   // === TRANSITIONS ENTRE LES SECTIONS ===
   const handleAfterSearch = (coursData) => {
     if (coursData) {
@@ -40,6 +42,49 @@ function FormSaisie() {
     }
     setShowSection2(true);
   };
+
+  const handleResetHistorique = () => {
+    if (historiqueRef.current) {
+      historiqueRef.current.handleReinitialiserLocal();
+    }
+
+    setShowSection3(false);
+    setShowSoumission(false);
+  }
+
+  const handleResetSession = () => {
+    /*if (historiqueRef.current) {
+      historiqueRef.current.handleReinitialiserLocal();
+    }
+
+    setShowSection3(false);
+    setShowSoumission(false);*/
+    handleResetHistorique();
+
+    setAnneeAcademique('');
+    setSemestre('');
+    setCodeProgramme('');
+    setCreditCours(0);
+    setIdEnseignant('');
+    setSessionVerouillee(false);
+    setTriggerSoumission(false);
+  }
+
+  const handleResetCours = () => {
+    setIntituleCours('');
+    setSigleCours('');
+    setAnneeAcademique('');
+    setSemestre('');
+    setCodeProgramme('');
+    setCreditCours(0);
+    setIdEnseignant('');
+    setSessionVerouillee(false);
+    setTriggerSoumission(false);
+    
+    setShowSection2(false);
+    setShowSection3(false);
+    setShowSoumission(false);
+  }
 
   const handleAfterValidation = (sessionData) => {
     if (sessionData) {
@@ -94,12 +139,7 @@ function FormSaisie() {
           <SectionCours
             onAfterSearch={handleAfterSearch}
             onReinitialiser={() => {
-              setShowSection2(false);
-              setShowSection3(false);
-              setShowSoumission(false);
-              // Reset cours
-              setIntituleCours('');
-              setSigleCours('');
+              handleResetCours();
             }}
           />
 
@@ -108,14 +148,7 @@ function FormSaisie() {
             <SectionSession
               onAfterValidation={handleAfterValidation}
               onReinitialiser={() => {
-                setShowSection3(false);
-                setShowSoumission(false);
-                // Reset session
-                setCodeProgramme('');
-                setAnneeAcademique('');
-                setSemestre('');
-                setCreditCours(0);
-                setIdEnseignant('');
+                handleResetSession();
               }}
               sessionVerouillee={sessionVerouillee} 
             />
@@ -135,6 +168,9 @@ function FormSaisie() {
               semestre={semestre}
               creditCours={creditCours}
               idEnseignant={idEnseignant}
+              onReinitialiser={() => {
+                handleResetHistorique();
+              }}
             />
           </div>
 
