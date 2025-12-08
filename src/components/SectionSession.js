@@ -1,5 +1,5 @@
 // === IMPORTATIONS ===
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { enregistrerProgramme } from '../services/api';
 import { getProgramme } from '../services/api';
 
@@ -17,7 +17,7 @@ function validerNomEnseignant(nom) {
 }
 
 // === COMPOSANT SECTION SESSION ===
-function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouillee }) {
+const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessionVerouillee }, ref) => {
   // === ÉTATS AVEC useState ===
   const [anneeAcademique, setAnneeAcademique] = useState('');  
   const [semestre, setSemestre] = useState(''); 
@@ -87,10 +87,8 @@ function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouille
     }
   };
 
-
-  // Validation complète
-  const handleValider = () => {
-    const nouvellesErreurs = {};
+  const handleDetecterErreurs = () => {
+     const nouvellesErreurs = {};
 
     if (!validerAnnee(anneeAcademique.trim())) {
       nouvellesErreurs.anneeAcademique = "Format d'année incorrect, attendu ex: 22-23";
@@ -113,8 +111,15 @@ function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouille
       nouvellesErreurs.idEnseignant = "Le nom de l'enseignant ne peut contenir que des lettres et espaces";
     }
 
-    setErreurs(nouvellesErreurs);
+    setErreurs(nouvellesErreurs); 
+    return nouvellesErreurs;
+  }
 
+  // Validation complète
+  const handleValider = () => {
+    const nouvellesErreurs = handleDetecterErreurs();
+
+    // Si pas d'erreurs, appeler le callback parent et marquer comme rempli
     if (Object.keys(nouvellesErreurs).length === 0) {
       if (onAfterValidation) onAfterValidation({
         anneeAcademique,
@@ -123,16 +128,33 @@ function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouille
         codeProgramme,
         idEnseignant: idEnseignant.trim() === "" ? null : idEnseignant.trim(),
       });
+      setSessionRemplie(true);
     }
 
-    setSessionRemplie(true);
+  };
+
+  const handleReinitialiserLocal = () => {
+      setAnneeAcademique('');
+      setSemestre('');
+      setCreditCours('');
+      setCodeProgramme('');
+      setIdEnseignant('');
+      setShowMiniForm(false);
+      setNouveauCode('');
+      setNouveauTitre('');
+      setNouveauNiveau('');
+      setErreurs({});
+      setAlerte(null);
+      setSessionRemplie(false);
+
+      if (onReinitialiser) onReinitialiser();
   };
 
   //Réinitialiser
-  const handleReinitialiser = () => {
-    if (onReinitialiser) onReinitialiser(); 
-    setSessionRemplie(false);
-  };
+  useImperativeHandle(ref, () => ({
+      handleReinitialiserLocal
+  }));
+
 
   useEffect(() => {
   if (!sessionVerouillee) {
@@ -355,7 +377,7 @@ function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouille
             type="button"
             className="btn btn-secondary ms-3 align-items-center"
             onClick={() => {
-              handleReinitialiser();
+              handleReinitialiserLocal();
             }}
           >
             Réinitialiser
@@ -380,6 +402,6 @@ function SectionSession({ onAfterValidation , onReinitialiser , sessionVerouille
 
     </div>
   );
-}
+})
 
 export default SectionSession;

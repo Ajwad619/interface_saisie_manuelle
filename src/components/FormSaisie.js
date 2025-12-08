@@ -15,6 +15,8 @@ function FormSaisie() {
   const [triggerSoumission, setTriggerSoumission] = useState(false);
   const [sessionVerouillee, setSessionVerouillee] = useState(false);
   const historiqueRef = useRef(null);
+  const sessionRef = useRef(null);
+  const coursRef = useRef(null);
 
   // === ÉTATS POUR TRANSMETTRE LES DONNÉES À SectionHistorique ===
   const [intituleCours, setIntituleCours] = useState('');
@@ -53,12 +55,6 @@ function FormSaisie() {
   }
 
   const handleResetSession = () => {
-    /*if (historiqueRef.current) {
-      historiqueRef.current.handleReinitialiserLocal();
-    }
-
-    setShowSection3(false);
-    setShowSoumission(false);*/
     handleResetHistorique();
 
     setAnneeAcademique('');
@@ -71,20 +67,19 @@ function FormSaisie() {
   }
 
   const handleResetCours = () => {
-    setIntituleCours('');
-    setSigleCours('');
-    setAnneeAcademique('');
-    setSemestre('');
-    setCodeProgramme('');
-    setCreditCours(0);
-    setIdEnseignant('');
-    setSessionVerouillee(false);
-    setTriggerSoumission(false);
+    if (historiqueRef.current) {
+        historiqueRef.current.handleReinitialiserLocal();
+    }
+
+    if (sessionRef.current) {
+        sessionRef.current.handleReinitialiserLocal();
+    }
     
     setShowSection2(false);
     setShowSection3(false);
     setShowSoumission(false);
-  }
+};
+
 
   const handleAfterValidation = (sessionData) => {
     if (sessionData) {
@@ -137,15 +132,16 @@ function FormSaisie() {
 
           {/* === SECTION COURS === */}
           <SectionCours
+            ref={coursRef}
             onAfterSearch={handleAfterSearch}
-            onReinitialiser={() => {
-              handleResetCours();
-            }}
+            onReinitialiser={handleResetCours}
           />
+
 
           {/* === SECTION SESSION === */}
           <div className={showSection2 ? '' : 'd-none'}>
             <SectionSession
+              ref={sessionRef}
               onAfterValidation={handleAfterValidation}
               onReinitialiser={() => {
                 handleResetSession();
@@ -157,6 +153,7 @@ function FormSaisie() {
           {/* === SECTION HISTORIQUE === */}
           <div className={showSection3 ? '' : 'd-none'}>
             <SectionHistorique
+              ref={historiqueRef}
               onSoumettre={handleSoumettre}
               triggerSoumission={triggerSoumission}
               setTriggerSoumission={setTriggerSoumission}

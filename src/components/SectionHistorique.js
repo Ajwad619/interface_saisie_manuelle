@@ -230,9 +230,6 @@ const SectionHistorique = forwardRef(({
   }, [etudiantChoisi, moyenneFinale, sanction, onToggleSoumission]);
 
 
-  console.log("Etat actuel etudiantChoisi =", etudiantChoisi) ;
-  /*console.log("Etat du setter =", setEtudiantChoisi());*/
-
   // === RENDU ===
   return (
     <div className="form-section">
@@ -280,7 +277,7 @@ const SectionHistorique = forwardRef(({
             />
           </div>
           <div className="col-12 mt-3">
-            <button className="btn btn-primary" onClick={handleRechercherEtudiant}>Rechercher</button>
+            {! (etudiantChoisi) &&<button className="btn btn-primary" onClick={handleRechercherEtudiant}>Rechercher</button>}
             <button className="btn btn-secondary ms-2" onClick={handleReinitialiserLocal}>Réinitialiser</button>
           </div>
         </div>
@@ -304,14 +301,12 @@ const SectionHistorique = forwardRef(({
                 <td>{e.nom}</td>
                 <td>{e.prenoms}</td>
                 <td>
-                  {! (etudiantChoisi) && (
                     <button
                       className="btn btn-success btn-sm"
                       onClick={() => handleChoisirEtudiant(e)}
                     >
                       Choisir
                     </button>
-                  )}
                 </td>
               </tr>
             )) : (

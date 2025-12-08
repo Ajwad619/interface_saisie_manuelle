@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { rechercherCours } from '../services/api';
 import { ajouterCours } from '../services/api';
 
@@ -17,7 +17,7 @@ function Alerte({ message, type, onClose }) {
   );
 }
 
-function SectionCours({ onAfterSearch, onReinitialiser }) {
+const SectionCours = forwardRef(({ onAfterSearch, onReinitialiser }, ref) => {
   const [sigleCours, setSigleCours] = useState('');
   const [intituleCours, setIntituleCours] = useState('');
   const [showTable, setShowTable] = useState(false);
@@ -47,14 +47,21 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
     }
   };
 
-  const handleReinitialiser = () => {
+  const handleReinitialiserLocal = () => {
     setSigleCours('');
     setIntituleCours('');
     setShowTable(false);
-    setResultats([]); 
+    setResultats([]);
+    setCoursChoisi(false);
+    setAlerte(null);
+
     if (onReinitialiser) onReinitialiser();
-    setCoursChoisi(false); 
   };
+
+  useImperativeHandle(ref, () => ({
+    handleReinitialiserLocal
+  }));
+
 
   const handleChoisir = (sigle, intitule) => {
     setSigleCours(sigle);
@@ -84,7 +91,10 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
       if (result.success) {
         setAlerte({ message: 'Cours ajouté !', type: 'success' });
         setCoursChoisi(true);
-        if (onAfterSearch) onAfterSearch();
+        if (onAfterSearch) onAfterSearch({
+          intituleCours,
+          sigleCours
+        });
       } else {
         setAlerte({ message: result.message, type: 'danger' });
       }
@@ -136,7 +146,7 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
           {!coursChoisi && (<button type="button" className="btn btn-primary mx-2" onClick={handleRechercher}>
             Rechercher
           </button>)}
-          <button type="button" className="btn btn-secondary mx-2" onClick={handleReinitialiser}>
+          <button type="button" className="btn btn-secondary mx-2" onClick={handleReinitialiserLocal}>
             Réinitialiser
           </button>
         </div>
@@ -189,6 +199,6 @@ function SectionCours({ onAfterSearch, onReinitialiser }) {
       </div>
     </div>
   );
-}
+})
 
 export default SectionCours;
