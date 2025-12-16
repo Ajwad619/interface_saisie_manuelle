@@ -1,28 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/api';
+import { login as apiLogin} from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
+  const { role , login: contextLogin } = useAuth();
   const [loginInput, setLoginInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  useEffect(() => {
+    if (role === 'admin') {
+      navigate('/admin-dashboard');
+    } else if (role === 'user') {
+      navigate('/cours');
+    }
+  }, [role, navigate]);
 
-    try {
-      const res = await login(loginInput, passwordInput);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+
+  try {
+      const res = await apiLogin(loginInput, passwordInput);
 
       if (res.success) {
-        navigate('/cours');
+        // === Stocker le rôle et l'identifiant dans localStorage ===
+        contextLogin(res.role, res.identifiant);
       } else {
         setError(res.message || 'Login ou mot de passe incorrect');
       }
-    } catch {
+      } catch {
       setError('Erreur serveur. Veuillez réessayer.');
-    }
+      }
   };
 
   return (

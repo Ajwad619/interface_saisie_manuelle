@@ -2,7 +2,7 @@
 
 session_set_cookie_params([
     'samesite' => 'None',
-    'secure' => false // mettre true uniquement si ton site est en https
+    'secure' => false 
 ]);
 
 session_start();
@@ -18,16 +18,6 @@ require_once __DIR__ . '/utils.php';
 error_log("Auth.php appelé depuis IP: " . $_SERVER['REMOTE_ADDR']);
 error_log("Méthode HTTP: " . $_SERVER['REQUEST_METHOD']);
 error_log("Session actuelle: " . json_encode($_SESSION));
-
-// --- Mode développement ---
-/*if (in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
-    if (!isset($_SESSION['user_id'])) {
-        $_SESSION['user_id'] = 'admin';
-        error_log("Mode dev : session initialisée avec user_id=admin");
-    }
-    envoyerReponse("Mode développement : connexion simulée", true);
-    exit;
-}*/
 
 try {
     $pdo = getDatabaseConnection('temp');
@@ -52,12 +42,10 @@ try {
  */
 function extraireDonneesConnexion(array $post): array
 {
-    $data = [
+    return [
         'login' => $post['login'] ?? null,
         'password' => $post['password'] ?? null,
     ];
-    error_log("Extraction des données : " . json_encode($data));
-    return $data;
 }
 
 /**
@@ -75,9 +63,9 @@ function validerDonneesConnexion(array $data): void
 /**
  * Vérifie l'authentification
  */
-function verifierAuthentification(PDO $pdo, array $data): void
-{
-    $sql = "SELECT identifiant, motdepasse FROM utilisateurs WHERE BINARY identifiant = :login LIMIT 1";
+function verifierAuthentification(PDO $pdo, array $data): void {
+    // === Récupérer identifiant, motdepasse ET role ===
+    $sql = "SELECT identifiant, motdepasse, role FROM utilisateurs WHERE BINARY identifiant = :login LIMIT 1";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':login' => $data['login']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -86,12 +74,24 @@ function verifierAuthentification(PDO $pdo, array $data): void
         error_log("Utilisateur non trouvé : " . $data['login']);
         envoyerReponse("Identifiant ou mot de passe incorrect.", false);
     }
-    error_log("Utilisateur trouvé : " . json_encode($user));
 
+    // === Vérifier mot de passe (en clair pour l'instant) ===
     if ($data['password'] === $user['motdepasse']) {
-        $_SESSION['user_id'] = $data['login'];
-        error_log("Connexion réussie pour : " . $data['login']);
-        envoyerReponse("Connexion réussie, bienvenue " . htmlspecialchars($data['login']) . " !", true);
+        // === Stocker dans la session : identifiant + rôle ===
+        $_SESSION['user_id'] = $user['identifiant'];
+        $_SESSION['role'] = $user['role']; // ← NOUVEAU
+
+        error_log("Connexion réussie pour : " . $user['identifiant'] . " (rôle: " . $user['role'] . ")");
+
+        // === Renvoyer rôle + identifiant dans la réponse ===
+        envoyerReponse(
+            "Connexion réussie, bienvenue " . htmlspecialchars($user['identifiant']) . " !",
+            true,
+            [
+                'role' => $user['role'],
+                'identifiant' => $user['identifiant']
+            ]
+        );
     } else {
         error_log("Mot de passe incorrect pour : " . $data['login']);
         envoyerReponse("Identifiant ou mot de passe incorrect.", false);

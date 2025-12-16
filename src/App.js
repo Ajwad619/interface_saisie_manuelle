@@ -1,22 +1,48 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import FormSaisie from './components/FormSaisie';
+import AdminDashboard from './components/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute'; 
 
 function App() {
   return (
-    <Router>
       <Routes>
 
-        {/* Page de LOGIN → pas de container */}
+        {/* Page de connexion */}
         <Route path="/" element={<Login />} />
 
-        {/* Page principale → on applique le layout Bootstrap */}
-       <Route path="/cours" element={<FormSaisie />} />
+        {/* Les différentes routes protégées */}
+        <Route
+          path="/cours"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'user']}>
+              <FormSaisie />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/search-modify"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <div>Page de recherche (à créer)</div>
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
-    </Router>
   );
 }
 
 export default App;
+

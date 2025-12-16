@@ -100,3 +100,175 @@ h1.title {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* --- SIDEBAR (BARRE LATÉRALE) --- */
+.sidebar {
+  width: 250px;
+  background-color: #ffffff;
+  height: 100vh;
+  position: top;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #dee2e6;
+  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar .breadcrumb {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar .breadcrumb a {
+  color: #666666;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.sidebar .breadcrumb a:hover {
+  color: #0066FF;
+  text-decoration: underline;
+}
+
+.sidebar .logout-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666666;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sidebar .logout-link:hover {
+  color: #dc3545;
+}
+
+/* --- BARRE DE NAVIGATION EN HAUT --- */
+.top-bar {
+  background-color: #fff8e1;
+  padding: 20px 40px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  position: fixed; 
+  top: 5px; 
+  left: 0px;
+  right: 0px;
+  z-index: 1000; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-top: 30px; /* Pour éviter le chevauchement avec la breadcrumb */
+}
+
+.top-bar h2 {
+  margin: 0; 
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.logout-btn-top {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.logout-btn-top:hover {
+  background-color: #c82333;
+}
+
+/* --- CONTENU PRINCIPAL --- */
+.main-content {
+  margin-left: 0px; /* Largeur de la sidebar */
+  padding: 20px 20px 40px 20px;  
+  min-height: 95vh;  
+  background-color: #f0f0f0; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.main-content .page-title {
+  text-align: center;
+  font-size: 28px; 
+  font-weight: bold;
+  margin-bottom: 60px; 
+  color: #343a40;
+}
+
+/* --- CARTE D'ACTION --- */
+.action-card {
+  background-color: #fbf6ebff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px; 
+  padding: 40px; 
+  width: 400px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  margin: 20px; 
+}
+
+.action-card:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.action-card .icon {
+  background-color: #e8f0ff;
+  width: 70px; 
+  height: 70px; 
+  border-radius: 50%; 
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  margin-bottom: 20px; 
+  font-size: 28px;
+  color: #0066FF;
+}
+
+.action-card h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px 0;
+  color: #000;
+}
+
+.action-card p {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+.action-card .btn-primary {
+  background-color: #0066FF;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  font-size: 16px;
+}
+
+.action-card .btn-primary:hover {
+  background-color: #0052CC;
+}

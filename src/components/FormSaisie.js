@@ -1,5 +1,8 @@
 // === IMPORTATIONS ===
 import React, { useState, useEffect,  useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Breadcrumb from './Breadcrumb';
+import { useAuth } from '../context/AuthContext';
 import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import SectionHistorique from './SectionHistorique';
@@ -26,6 +29,15 @@ function FormSaisie() {
   const [semestre, setSemestre] = useState('');
   const [creditCours, setCreditCours] = useState(0);
   const [idEnseignant, setIdEnseignant] = useState('');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+      logout();
+      navigate('/');
+    }
+  };
 
   // === FERME L'ALERTE AUTOMATIQUEMENT ===
   useEffect(() => {
@@ -118,7 +130,21 @@ function FormSaisie() {
 
   // === RENDU ===
   return (
-    <div className="container mt-4">
+    <div className="container mt-12 mb-5">
+       {/* BREADCRUMB */}
+        <Breadcrumb />
+
+      {/* === BARRE DE NAVIGATION EN HAUT === */}
+      <header className="top-bar">
+        <h2>Insertion de Données</h2>
+        <button
+          onClick={handleLogout}
+          className="logout-btn-top"
+        >
+          [→] Déconnexion
+        </button>
+      </header>
+
       <div className="row justify-content-center">
         <div className="col-12 col-lg-10">
 
