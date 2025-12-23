@@ -4,6 +4,7 @@ import Login from './components/Login';
 import FormSaisie from './components/FormSaisie';
 import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; 
+import SearchModify from './components/SearchModify';
 
 function App() {
   return (
@@ -35,7 +36,7 @@ function App() {
           path="/search-modify"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <div>Page de recherche (à créer)</div>
+              <SearchModify />
             </ProtectedRoute>
           }
         />

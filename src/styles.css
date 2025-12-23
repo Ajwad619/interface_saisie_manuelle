@@ -4,13 +4,13 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #f8f9fa; /* Fond gris clair */
+  background-color: #f8f9fa; 
   font-family: 'Inter', sans-serif;
 }
 
 /* --- SECTIONS DE FORMULAIRE --- */
 .form-section {
-  background-color: #fbf6ebff; /* Fond crème */
+  background-color: #fbf6ebff; 
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -42,7 +42,7 @@ h1.title {
   margin-top: 20px;
 }
 
-/* --- CLASSE POUR MASQUER (équivalent à d-none) --- */
+/* --- CLASSE POUR MASQUER --- */
 .hidden {
   display: none;
 }
@@ -163,7 +163,7 @@ h1.title {
   right: 0px;
   z-index: 1000; 
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  margin-top: 30px; /* Pour éviter le chevauchement avec la breadcrumb */
+  margin-top: 30px; 
 }
 
 .top-bar h2 {
@@ -271,4 +271,47 @@ h1.title {
 
 .action-card .btn-primary:hover {
   background-color: #0052CC;
+}
+
+/* --- SECTION DE RECHERCHE --- */
+.search-section {
+  background-color: #fbf6ebff; 
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  border: 1px solid #EEEEEE;
+}
+
+.search-section h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #000;
+}
+
+/* --- GRILLE DE FORMULAIRE --- */
+.search-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.search-form-grid.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 18px;
+}
+
+@media (max-width: 720px) {
+  .search-form-grid.grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- LABEL --- */
+.search-form-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+  color: #666666;
 }
