@@ -184,3 +184,65 @@ export async function enregistrerInscription(data) {
   }
 }
 
+// ------------------------
+// Fonction pour rechercher des données (sessions ou inscriptions)
+// ------------------------
+export async function rechercherDonnees(criteria, type) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rechercher.php`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ criteria, type }),
+      credentials: 'include'
+    });
+
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error('Réponse non JSON :', text);
+      return { success: false, message: 'Réponse serveur invalide' };
+    }
+  } catch (error) {
+    console.error('Erreur API rechercherDonnees:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ------------------------
+// Fonction pour récupérer les années académiques uniques
+// ------------------------
+export async function getAnneesAcademiques() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/options/annees.php`);
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error('Réponse non JSON (annees):', text);
+      return { success: false, message: 'Réponse serveur invalide' };
+    }
+  } catch (error) {
+    console.error('Erreur API getAnneesAcademiques:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ------------------------
+// Fonction pour récupérer les codes programme uniques
+// ------------------------
+export async function getCodesProgramme() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/options/codes.php`);
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error('Réponse non JSON (codes):', text);
+      return { success: false, message: 'Réponse serveur invalide' };
+    }
+  } catch (error) {
+    console.error('Erreur API getCodesProgramme:', error);
+    return { success: false, message: error.message };
+  }
+}

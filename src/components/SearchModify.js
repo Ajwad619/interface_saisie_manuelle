@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Breadcrumb from './Breadcrumb'; 
+import debounce from 'lodash.debounce';
+import { rechercherDonnees, getAnneesAcademiques, getCodesProgramme } from '../services/api'; 
 
 function SearchModify() {
   // === HOOKS DE NAVIGATION ET AUTH ===
@@ -40,6 +42,115 @@ function SearchModify() {
   const [searchType, setSearchType] = useState('');        // 'sessions' ou 'inscriptions'
   const [loading, setLoading] = useState(false);            // indicateur de chargement
 
+  // == ETATS POUR LES OPTIONS DYNAMIQUES ==
+  const [anneesAcademiques, setAnneesAcademiques] = useState([]); // ← nouvelles années
+  const [codesProgramme, setCodesProgramme] = useState([]);      // ← nouveaux codes
+  const [loadingOptions, setLoadingOptions] = useState(true);    // ← chargement initial
+
+  // === FONCTION DE RECHERCHE DÉBOUNCÉE (pause de 0.3s) ===
+  const debouncedSearch = React.useRef(
+    debounce(async (criteria) => {
+      // Vérifier si au moins un champ est rempli
+      const hasAnyField = Object.values(criteria).some(
+        value => value !== '' && value !== 'Tous les semestres'
+      );
+  
+      if (!hasAnyField) {
+        setSearchResults([]);
+        setSearchType('');
+        return;
+      }
+  
+      // Déterminer le type de recherche
+      const hasStudentInfo = 
+        criteria.matricule.trim() !== '' || 
+        criteria.nom.trim() !== '' || 
+        criteria.prenoms.trim() !== '';
+      
+      const type = hasStudentInfo ? 'inscriptions' : 'sessions';
+      setSearchType(type);
+      setLoading(true);
+  
+      try {
+        // Appeler l'API
+        const response = await rechercherDonnees(criteria, type);
+      
+        if (response.success) {
+          setSearchResults(response.results || []);
+        } else {
+          setSearchResults([]);
+          console.error('Erreur recherche:', response.message);
+        }
+      } catch (error) {
+        console.error('Erreur réseau:', error);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300)
+  ).current;
+
+  // === GESTION DES CHANGEMENTS DANS LE FORMULAIRE ===
+  const handleInputChange = (field, value) => {
+    setSearchCriteria(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // === EFFET DE RECHERCHE AUTOMATIQUE ===
+  useEffect(() => {
+    debouncedSearch(searchCriteria);
+    
+    // Nettoyage du debounce à la destruction du composant
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchCriteria, debouncedSearch]);
+
+  // === CHARGER LES OPTIONS AU CHARGEMENT DE LA PAGE ===
+  const chargerOptions = async () => {
+  try {
+      // Récupérer les années académiques
+      const anneesData = await getAnneesAcademiques();
+      const codesData = await getCodesProgramme();
+
+      console.log("Données reçues (années):", anneesData);
+      console.log("Données reçues (codes):", codesData);
+      
+      if (anneesData.success) {
+        setAnneesAcademiques(anneesData.annees || []);
+      } else {
+        console.error('Erreur chargement années:', anneesData.message);
+      }
+      
+      if (codesData.success) {
+        setCodesProgramme(codesData.codes || []);
+      } else {
+        console.error('Erreur chargement codes:', codesData.message);
+      }
+    } catch (error) {
+      console.error('Erreur inattendue:', error);
+    } finally {
+      setLoadingOptions(false);
+    }
+  };
+
+  useEffect(() => {
+    chargerOptions();
+  }, []);
+
+  // === GESTION DU CLIQUE SUR "CHOISIR" ===
+  const handleChoisirSession = (session) => {
+    // Pour l'instant, on se contente de logger
+    console.log("Session choisie :", session);
+    // Plus tard : navigate('/edit-session', { state: { session } });
+  };
+  const handleChoisirInscription = (inscription) => {
+    console.log("Inscription choisie :", inscription);
+    // Plus tard : navigate('/edit-inscription', { state: { inscription } });
+  };
+  
   // === RENDU DE LA PAGE ===
   return (
     <div style={{
@@ -97,10 +208,7 @@ function SearchModify() {
                       type="text"
                       className="form-control"
                       value={searchCriteria.sigleCours}
-                      onChange={(e) => setSearchCriteria({
-                        ...searchCriteria,
-                        sigleCours: e.target.value
-                      })}
+                      onChange={(e) => handleInputChange('sigleCours', e.target.value)}
                       placeholder="Ex: 2ANG2128"
                     />
                   </div>
@@ -112,10 +220,7 @@ function SearchModify() {
                       type="text"
                       className="form-control"
                       value={searchCriteria.intituleCours}
-                      onChange={(e) => setSearchCriteria({
-                        ...searchCriteria,
-                        intituleCours: e.target.value
-                      })}
+                      onChange={(e) => handleInputChange('intituleCours', e.target.value)}
                       placeholder="Ex: Anglais Expression Orale"
                     />
                   </div>
@@ -126,16 +231,16 @@ function SearchModify() {
                 {/* Année académique */}
                 <div>
                   <label className="search-form-label">Année académique</label>
-                  <input
-                    type="text"
+                  <select
                     className="form-control"
                     value={searchCriteria.anneeAcademique}
-                    onChange={(e) => setSearchCriteria({
-                      ...searchCriteria,
-                      anneeAcademique: e.target.value
-                    })}
-                    placeholder="Ex: 21-22"
-                  />
+                    onChange={(e) => handleInputChange('anneeAcademique', e.target.value)}
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    {anneesAcademiques.map(annee => (
+                      <option key={annee} value={annee}>{annee}</option>
+                    ))}
+                  </select>
                 </div>
                   
                 {/* Semestre */}
@@ -144,10 +249,7 @@ function SearchModify() {
                   <select
                     className="form-control"
                     value={searchCriteria.semestre}
-                    onChange={(e) => setSearchCriteria({
-                      ...searchCriteria,
-                      semestre: e.target.value
-                    })}
+                    onChange={(e) => handleInputChange('semestre', e.target.value)}
                   >
                     <option>Tous les semestres</option>
                     <option>Semestre 1</option>
@@ -167,12 +269,9 @@ function SearchModify() {
                     type="number"
                     className="form-control"
                     value={searchCriteria.creditCours}
-                    onChange={(e) => setSearchCriteria({
-                      ...searchCriteria,
-                      creditCours: e.target.value
-                    })}
+                    onChange={(e) => handleInputChange('creditCours', e.target.value)}
                     min="1"
-                    max="10"
+                    max="15"
                     placeholder="Ex: 2"
                   />
                 </div>
@@ -180,16 +279,16 @@ function SearchModify() {
                 {/* Code Programme */}
                 <div>
                   <label className="search-form-label">Code Programme</label>
-                  <input
-                    type="text"
+                  <select
                     className="form-control"
                     value={searchCriteria.codeProgramme}
-                    onChange={(e) => setSearchCriteria({
-                      ...searchCriteria,
-                      codeProgramme: e.target.value
-                    })}
-                    placeholder="Ex: DOC-TIC"
-                  />
+                    onChange={(e) => handleInputChange('codeProgramme', e.target.value)}
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    {codesProgramme.map(code => (
+                      <option key={code} value={code}>{code}</option>
+                    ))}
+                  </select>
                 </div>
                   
                 {/* Identifiant de l'enseignant */}
@@ -199,10 +298,7 @@ function SearchModify() {
                     type="text"
                     className="form-control"
                     value={searchCriteria.idEnseignant}
-                    onChange={(e) => setSearchCriteria({
-                      ...searchCriteria,
-                      idEnseignant: e.target.value
-                    })}
+                    onChange={(e) => handleInputChange('idEnseignant', e.target.value)}
                     placeholder="Ex: ENG001"
                   />
                 </div>
@@ -224,10 +320,7 @@ function SearchModify() {
                   type="text"
                   className="form-control"
                   value={searchCriteria.matricule}
-                  onChange={(e) => setSearchCriteria({
-                    ...searchCriteria,
-                    matricule: e.target.value
-                  })}
+                  onChange={(e) => handleInputChange('matricule', e.target.value)}
                   placeholder="Ex: UAC2025001"
                 />
               </div>
@@ -239,10 +332,7 @@ function SearchModify() {
                   type="text"
                   className="form-control"
                   value={searchCriteria.nom}
-                  onChange={(e) => setSearchCriteria({
-                    ...searchCriteria,
-                    nom: e.target.value
-                  })}
+                  onChange={(e) => handleInputChange('nom', e.target.value)}
                   placeholder="Nom de famille"
                 />
               </div>
@@ -254,10 +344,7 @@ function SearchModify() {
                   type="text"
                   className="form-control"
                   value={searchCriteria.prenoms}
-                  onChange={(e) => setSearchCriteria({
-                    ...searchCriteria,
-                    prenoms: e.target.value
-                  })}
+                  onChange={(e) => handleInputChange('prenoms', e.target.value)}
                   placeholder="Prénoms de l'étudiant"
                 />
               </div>
@@ -271,7 +358,105 @@ function SearchModify() {
           maxWidth: '1200px',
           marginTop: '20px'
         }}>
-          <p>Résultats (à venir)</p>
+          {loading && (
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Chargement...</span>
+              </div>
+              <p>Recherche en cours...</p>
+            </div>
+          )}
+
+          {!loading && searchResults.length === 0 && (
+            <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+              {Object.values(searchCriteria).some(v => v && v !== 'Tous les semestres')
+                ? "Aucun résultat trouvé pour votre recherche"
+                : "Remplissez au moins un champ pour lancer la recherche"
+              }
+            </div>
+          )}
+
+          {!loading && searchResults.length > 0 && (
+            <div>
+              {searchType === 'sessions' ? (
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Sigle</th>
+                      <th>Intitulé</th>
+                      <th>Année</th>
+                      <th>Semestre</th>
+                      <th>Code Prog</th>
+                      <th>Crédit</th>
+                      <th>Enseignant</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((session, index) => (
+                      <tr key={index}>
+                        <td>{session.sigleCours}</td>
+                        <td>{session.intituleCours}</td>
+                        <td>{session.anneeAcademique}</td>
+                        <td>{session.semestre}</td>
+                        <td>{session.codeProgramme}</td>
+                        <td>{session.creditCours}</td>
+                        <td>{session.idEnseignant}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleChoisirSession(session)}
+                          >
+                            Choisir
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Matricule</th>
+                      <th>Nom</th>
+                      <th>Prénoms</th>
+                      <th>Cours</th>
+                      <th>Année</th>
+                      <th>Semestre</th>
+                      <th>Code Prog</th>
+                      <th>Moyenne</th>
+                      <th>Sanction</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((inscription, index) => (
+                      <tr key={index}>
+                        <td>{inscription.matricule}</td>
+                        <td>{inscription.nom}</td>
+                        <td>{inscription.prenoms}</td>
+                        <td>{inscription.intituleCours}</td>
+                        <td>{inscription.anneeAcademique}</td>
+                        <td>{inscription.semestre}</td>
+                        <td>{inscription.codeProgramme}</td>
+                        <td>{inscription.moyenneFinale}</td>
+                        <td>{inscription.sanction}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleChoisirInscription(inscription)}
+                          >
+                            Choisir
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>
