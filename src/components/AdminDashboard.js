@@ -1,4 +1,4 @@
-// === PAGE D'ACCUEIL ADMIN ===
+// === Page d'accueil admin ===
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';

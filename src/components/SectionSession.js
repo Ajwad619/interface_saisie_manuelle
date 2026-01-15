@@ -1,4 +1,5 @@
-// === IMPORTATIONS ===
+// === Composant pour la section de gestion de la session de cours ===
+
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { enregistrerProgramme } from '../services/api';
 import { getProgramme } from '../services/api';
@@ -17,7 +18,8 @@ function validerNomEnseignant(nom) {
 }
 
 // === COMPOSANT SECTION SESSION ===
-const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessionVerouillee }, ref) => {
+const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessionVerouillee , initialData }, ref) => {
+  
   // === ÉTATS AVEC useState ===
   const [anneeAcademique, setAnneeAcademique] = useState('');  
   const [semestre, setSemestre] = useState(''); 
@@ -31,6 +33,17 @@ const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessi
   const [nouveauNiveau, setNouveauNiveau] = useState('');
   const [sessionRemplie, setSessionRemplie] = useState(false);
 
+  // On mets à jour les états si initialData change
+  useEffect(() => {
+    if (initialData) {
+      setAnneeAcademique(initialData.anneeAcademique || '');
+      setSemestre(String(initialData.semestre || ''));
+      setCreditCours(String(initialData.creditCours || ''));
+      setCodeProgramme(initialData.codeProgramme || '');
+      setIdEnseignant(initialData.idEnseignant || '');
+    }
+  }, [initialData]); // ← dépendance : réagit quand initialData change
+
   // États pour les erreurs
   const [erreurs, setErreurs] = useState({});
 
@@ -43,7 +56,6 @@ const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessi
      .then(data => setProgrammes(data))
      .catch(err => console.error(err));
   } , []);
-
 
 
   // === FONCTIONS POUR LES BOUTONS ===
@@ -121,6 +133,13 @@ const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessi
 
     // Si pas d'erreurs, appeler le callback parent et marquer comme rempli
     if (Object.keys(nouvellesErreurs).length === 0) {
+        console.log("Appel de onAfterValidation avec :", {
+          anneeAcademique,
+          semestre,
+          creditCours,
+          codeProgramme,
+          idEnseignant: idEnseignant.trim() === "" ? null : idEnseignant.trim(),
+        });
       if (onAfterValidation) onAfterValidation({
         anneeAcademique,
         semestre,

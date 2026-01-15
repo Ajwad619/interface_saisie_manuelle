@@ -1,4 +1,5 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+// === Composant pour la section de gestion des cours ===
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { rechercherCours } from '../services/api';
 import { ajouterCours } from '../services/api';
 
@@ -17,7 +18,7 @@ function Alerte({ message, type, onClose }) {
   );
 }
 
-const SectionCours = forwardRef(({ onAfterSearch, onReinitialiser }, ref) => {
+const SectionCours = forwardRef(({ onAfterValidation, onReinitialiser , selectedCours }, ref) => {
   const [sigleCours, setSigleCours] = useState('');
   const [intituleCours, setIntituleCours] = useState('');
   const [showTable, setShowTable] = useState(false);
@@ -25,6 +26,20 @@ const SectionCours = forwardRef(({ onAfterSearch, onReinitialiser }, ref) => {
   const [alerte, setAlerte] = useState(null);
   const [coursChoisi, setCoursChoisi] = useState(false);
   
+  useEffect(() => {
+    if (selectedCours) {
+      setSigleCours(selectedCours.sigleCours || '');
+      setIntituleCours(selectedCours.intituleCours || '');
+      setCoursChoisi(true); // Verrouille les champs
+      if (onAfterValidation) {
+        onAfterValidation({
+          sigleCours: selectedCours.sigleCours || '',
+          intituleCours: selectedCours.intituleCours || ''
+        });
+      }
+    }
+  }, [selectedCours, onAfterValidation]);
+
   const handleRechercher = async () => {
     if (!sigleCours.trim() && !intituleCours.trim()) {
       setAlerte({ message: 'Veuillez remplir au moins un champ de recherche.', type: 'warning' });
@@ -69,7 +84,7 @@ const SectionCours = forwardRef(({ onAfterSearch, onReinitialiser }, ref) => {
     setShowTable(false);
     setCoursChoisi(true);
 
-    if (onAfterSearch) onAfterSearch({
+    if (onAfterValidation) onAfterValidation({
       intituleCours: intitule,
       sigleCours: sigle,
     });
@@ -91,7 +106,7 @@ const SectionCours = forwardRef(({ onAfterSearch, onReinitialiser }, ref) => {
       if (result.success) {
         setAlerte({ message: 'Cours ajouté !', type: 'success' });
         setCoursChoisi(true);
-        if (onAfterSearch) onAfterSearch({
+        if (onAfterValidation) onAfterValidation({
           intituleCours,
           sigleCours
         });

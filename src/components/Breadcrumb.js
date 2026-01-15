@@ -1,26 +1,41 @@
-// === BREADCRUMB POUR ME MONTRER LE CHEMIN ===
+// === Composant pour l'arborescence de navigation (breadcrumb) ===
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-function Breadcrumb() {
+function Breadcrumb({ customPath, parentPaths = [] }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Définir les chemins et titres
+  // Définir les chemins standards
   const routes = [
     { path: '/admin-dashboard', label: 'Accueil' },
     { path: '/cours', label: 'Insérer des données' },
-    { path: '/search-modify', label: 'Rechercher et Modifier' }
+    { path: '/search-modify', label: 'Rechercher et Modifier' },
+    { path: '/edit-session', label: 'Détails de la session' },
+    { path: '/transfer-session', label: 'Transférer le cours' },
+    { path: '/session-inscriptions', label: 'Inscriptions de la session' }
   ];
 
-  // Trouver le chemin courant
-  const currentRoute = routes.find(r => r.path === location.pathname);
+  // Construire le chemin complet
+  let breadcrumbItems = [];
 
-  // Construire le breadcrumb
-  const breadcrumbItems = [
-    { label: 'Accueil', path: '/admin-dashboard' }
-  ];
+  // Ajouter "Accueil"
+  breadcrumbItems.push({ label: 'Accueil', path: '/admin-dashboard' });
+
+  // Ajouter les parents
+  parentPaths.forEach(path => {
+    const route = routes.find(r => r.path === path);
+    if (route) {
+      breadcrumbItems.push(route);
+    }
+  });
+
+  // Ajouter le chemin courant
+  let currentRoute = routes.find(r => r.path === location.pathname);
+  if (customPath) {
+    currentRoute = customPath;
+  }
 
   if (currentRoute && currentRoute.path !== '/admin-dashboard') {
     breadcrumbItems.push(currentRoute);

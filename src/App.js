@@ -5,6 +5,10 @@ import FormSaisie from './components/FormSaisie';
 import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; 
 import SearchModify from './components/SearchModify';
+import EditSession from './components/EditSession';
+import TransferSession from './components/TransferSession';
+import SessionInscriptions from './components/SessionInscriptions';
+import EditInscription from './components/EditInscription';
 
 function App() {
   return (
@@ -37,6 +41,42 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <SearchModify />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/edit-session"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <EditSession />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/transfer-session"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <TransferSession />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/session-inscriptions"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SessionInscriptions />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/edit-inscription"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <EditInscription />
             </ProtectedRoute>
           }
         />

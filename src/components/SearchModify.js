@@ -1,11 +1,11 @@
-// === PAGE DE RECHERCHE ET MODIFICATION ===
+// === Page de recherche d'une session ou d'une inscription ===
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Breadcrumb from './Breadcrumb'; 
 import debounce from 'lodash.debounce';
-import { rechercherDonnees, getAnneesAcademiques, getCodesProgramme } from '../services/api'; 
+import { rechercherDonnees, getAnneesAcademiques, getCodesProgramme, deleteInscription } from '../services/api'; 
 
 function SearchModify() {
   // === HOOKS DE NAVIGATION ET AUTH ===
@@ -38,9 +38,9 @@ function SearchModify() {
   });
 
   // === ÉTAT DES RÉSULTATS ===
-  const [searchResults, setSearchResults] = useState([]); // résultats de la recherche
+  const [searchResults, setSearchResults] = useState([]); 
   const [searchType, setSearchType] = useState('');        // 'sessions' ou 'inscriptions'
-  const [loading, setLoading] = useState(false);            // indicateur de chargement
+  const [loading, setLoading] = useState(false);            
 
   // == ETATS POUR LES OPTIONS DYNAMIQUES ==
   const [anneesAcademiques, setAnneesAcademiques] = useState([]); // ← nouvelles années
@@ -142,13 +142,26 @@ function SearchModify() {
 
   // === GESTION DU CLIQUE SUR "CHOISIR" ===
   const handleChoisirSession = (session) => {
-    // Pour l'instant, on se contente de logger
     console.log("Session choisie :", session);
-    // Plus tard : navigate('/edit-session', { state: { session } });
+    navigate('/edit-session', { state: { session } });
   };
+  
   const handleChoisirInscription = (inscription) => {
     console.log("Inscription choisie :", inscription);
-    // Plus tard : navigate('/edit-inscription', { state: { inscription } });
+    navigate(`/edit-inscription?id=${inscription.id}`);
+  };
+
+  // === GESTION DE LA SUPPRESSION D'UNE INSCRIPTION ===
+  const handleSupprimerInscription = async (id, matricule) => {
+    if (!window.confirm(`Supprimer l'inscription de ${matricule} ?`)) return;
+    
+    try {
+      await deleteInscription(id); // ← Tu dois importer deleteInscription
+      // Recharger la recherche
+      debouncedSearch(searchCriteria);
+    } catch (error) {
+      alert('Erreur : ' + error.message);
+    }
   };
   
   // === RENDU DE LA PAGE ===
@@ -175,12 +188,21 @@ function SearchModify() {
       </header>
 
       {/* === CONTENU PRINCIPAL === */}
-      <main style={{
-        padding: '30px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
+        <main style={{
+          padding: '30px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}>
+        
+        {loadingOptions ? (
+          <div className="text-center my-3">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Chargement des options...</span>
+            </div>
+          </div>
+        ) : (
+          <>
         
         <h1 style={{
           fontSize: '24px',
@@ -188,12 +210,15 @@ function SearchModify() {
           marginBottom: '30px',
           color: '#343a40'
         }}>
-          Rechercher et Modifier les données
+          Informations de recherche
         </h1>
+
+
         {/* === FORMULAIRE DE RECHERCHE === */}
         <div style={{
           width: '100%',
-          maxWidth: '1200px'
+          maxWidth: '1200px',
+          margin: '0 auto' 
         }}>
         
           {/* SECTION 1 : Informations Session de Cours */}
@@ -307,7 +332,7 @@ function SearchModify() {
                 
           {/* SECTION 2 : Informations Étudiant */}
           <div className="search-section">
-            <h3>Informations Étudiant</h3>
+            <h3>Informations Étudiant (optionnel)</h3>
             <p style={{ color: '#666', fontSize: '14px', marginBottom: '15px' }}>
               Laisser vides ces champs pour ne voir que les sessions de cours. Les remplir pour voir des inscriptions précises d'étudiants.
             </p>
@@ -350,14 +375,32 @@ function SearchModify() {
               </div>
             </div>
           </div>
+
+          <div className="d-flex justify-content-center mt-4">
+            <button className="btn btn-secondary" onClick={() => navigate('/')}>
+              Revenir à l'accueil
+            </button>
+          </div>
+
+
+        <hr style={{ border: 'none', height: '1px', backgroundColor: '#000', margin: '24px 0' }} />
         </div>
+
 
         {/* === RÉSULTATS === */}
         <div style={{
           width: '100%',
           maxWidth: '1200px',
-          marginTop: '20px'
+          margin: '20px auto 0'
         }}>
+          <h1 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            marginBottom: '30px',
+            color: '#343a40'
+          }}>
+           Résultats de la recherche
+          </h1>
           {loading && (
             <div className="text-center">
               <div className="spinner-border text-primary" role="status">
@@ -366,7 +409,6 @@ function SearchModify() {
               <p>Recherche en cours...</p>
             </div>
           )}
-
           {!loading && searchResults.length === 0 && (
             <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
               {Object.values(searchCriteria).some(v => v && v !== 'Tous les semestres')
@@ -376,10 +418,22 @@ function SearchModify() {
             </div>
           )}
 
+          {/* === COMPTER LES RÉSULTATS === */}
+          {!loading && searchResults.length > 0 && (
+            <div style={{
+              textAlign: 'center',
+              color: '#666', // gris comme "Aucun résultat"
+              fontSize: '14px',
+              marginBottom: '10px'
+            }}>
+              {searchResults.length} résultat{searchResults.length > 1 ? 's' : ''} trouvé{searchResults.length > 1 ? 's' : ''}
+            </div>
+          )}
+
           {!loading && searchResults.length > 0 && (
             <div>
               {searchType === 'sessions' ? (
-                <table className="table table-striped">
+                <table className="table table-striped" style={{ width: '115%', margin: '0 -7.5%' }}>
                   <thead>
                     <tr>
                       <th>Sigle</th>
@@ -415,7 +469,7 @@ function SearchModify() {
                   </tbody>
                 </table>
               ) : (
-                <table className="table table-striped">
+                <table className="table table-striped" style={{ width: '115%', margin: '0 -7.5%' }}>
                   <thead>
                     <tr>
                       <th>Matricule</th>
@@ -444,10 +498,16 @@ function SearchModify() {
                         <td>{inscription.sanction}</td>
                         <td>
                           <button
-                            className="btn btn-sm btn-primary"
+                            className="btn btn-sm btn-primary me-2"
                             onClick={() => handleChoisirInscription(inscription)}
                           >
                             Choisir
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleSupprimerInscription(inscription.id, inscription.matricule)}
+                          >
+                            🗑️
                           </button>
                         </td>
                       </tr>
@@ -458,6 +518,8 @@ function SearchModify() {
             </div>
           )}
         </div>
+        </>
+        )}
       </main>
     </div>
   );

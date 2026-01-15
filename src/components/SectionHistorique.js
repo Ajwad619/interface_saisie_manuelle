@@ -1,4 +1,5 @@
-// SectionHistorique.js
+// === Composant pour la section historique d'inscription d'un étudiant ===
+
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { rechercherEtudiants } from '../services/api';
 

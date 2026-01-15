@@ -246,3 +246,79 @@ export async function getCodesProgramme() {
     return { success: false, message: error.message };
   }
 }
+
+// ------------------------
+// Fonction pour transférer une session
+// ------------------------
+export async function transfererSession(data) {
+  const response = await fetch(`${API_BASE_URL}/transferer_session.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+
+  if (result.success) {
+    return result;
+  }
+
+  throw new Error(result.error || 'Erreur inconnue');
+  
+}
+
+// ------------------------
+// Fonction pour récupérer les inscriptions d'une session
+// ------------------------
+export async function getInscriptionsSession(params) {
+  const query = new URLSearchParams(params).toString();
+  const response = await fetch(`${API_BASE_URL}/recuperer_inscriptions_session.php?${query}`, {
+    credentials: 'include'
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.error || 'Erreur');
+  return result.data;
+}
+
+// ------------------------
+// Fonction pour supprimer une inscription
+// ------------------------
+export async function deleteInscription(id) {
+  const response = await fetch(`${API_BASE_URL}/supprimer_inscription.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ id })
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.error || 'Erreur');
+  return result;
+}
+
+// ------------------------
+// Récupérer une inscription par ID
+// ------------------------
+export async function getInscriptionById(id) {
+  const response = await fetch(`${API_BASE_URL}/recuperer_inscription_par_id.php?id=${id}`, {
+    credentials: 'include' 
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.error || 'Erreur lors du chargement de l’inscription.');
+  return result.data;
+}
+
+// ------------------------
+// Mettre à jour une inscription
+// ------------------------
+export async function updateInscription(data) {
+  const response = await fetch(`${API_BASE_URL}/mettre_a_jour_inscription.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.error || 'Erreur lors de la mise à jour.');
+  return result;
+}

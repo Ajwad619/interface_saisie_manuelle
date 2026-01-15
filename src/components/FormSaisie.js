@@ -1,3 +1,5 @@
+// === Composant principal du formulaire de saisie d'inscriptions ===
+
 // === IMPORTATIONS ===
 import React, { useState, useEffect,  useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +33,7 @@ function FormSaisie() {
   const [idEnseignant, setIdEnseignant] = useState('');
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { role } = useAuth();
 
   const handleLogout = () => {
     if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
@@ -206,6 +209,17 @@ function FormSaisie() {
                 onClick={declencherSoumission}
               >
                 Soumission finale
+              </button>
+            </div>
+          )}
+
+         {role === 'admin' && (
+          <div className="d-flex justify-content-center mt-4">
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => navigate('/')}
+              >
+                Revenir à l'accueil
               </button>
             </div>
           )}
