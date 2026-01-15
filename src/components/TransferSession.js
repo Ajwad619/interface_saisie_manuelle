@@ -1,4 +1,4 @@
-// === PAGE DE TRANSFERT DE SESSION ===
+// === Page de transfert de session ===
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -33,10 +33,8 @@ function TransferSession() {
   const [newCours, setNewCours] = useState(null);
   const [newSession, setNewSession] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false); 
-
-  // Juste après les useState
-  console.log("État initial - newCours:", newCours);
-  console.log("État initial - newSession:", newSession); 
+  const [sessionValidee, setSessionValidee] = useState(false);
+  const [alerte, setAlerte] = useState(null);
 
   // Dans useEffect de validation
   useEffect(() => {
@@ -70,6 +68,19 @@ function TransferSession() {
     setIsFormValid(coursChanged || sessionChanged);
   }, [newCours, newSession, originalSession]);
 
+  // === FERME L'ALERTE AUTOMATIQUEMENT ===
+    useEffect(() => {
+      if (alerte) {
+        const timer = setTimeout(() => {
+          if (alerte.redirect) {
+            navigate('/search-modify');
+          }
+          setAlerte(null);
+        }, 800); 
+        return () => clearTimeout(timer);
+      }
+    }, [alerte, navigate]);
+
   // === ACTION TRANSFERT ===
   const handleTransfer = async () => {
     try {
@@ -87,8 +98,10 @@ function TransferSession() {
       };
 
       await transfererSession(data);
-      alert("Transfert réussi !");
-      navigate('/search-modify');
+      // Afficher l'alerte localement (même comportement que FormSaisie.js)
+      // et demander une redirection après fermeture/auto-fermeture
+      setAlerte({ type: "success", message: "Transfert réussi !", redirect: true });
+      // Ne pas naviguer immédiatement afin que l'alerte reste visible sur cette page
 
     } catch (error) {
       console.error("Erreur transfert:", error);
@@ -96,7 +109,7 @@ function TransferSession() {
       if (error.message === "SESSION_EXISTE") {
         message = "⚠️ Une session identique existe déjà...";
       }
-      alert(message);
+      setAlerte({ type: "danger", message });
     }
   };
 
@@ -146,16 +159,20 @@ function TransferSession() {
           />
 
           {/* SECTION SESSION */}
-          <SectionSession
-            onAfterValidation={setNewSession}
-            initialData={{
-              anneeAcademique: originalSession.anneeAcademique || '',
-              semestre: String(originalSession.semestre || ''),
-              codeProgramme: originalSession.codeProgramme || '',
-              creditCours: String(originalSession.creditCours || ''),
-              idEnseignant: originalSession.idEnseignant || ''  
-            }}
-          />
+            <SectionSession
+              onAfterValidation={(data) => {
+                setNewSession(data);
+                setSessionValidee(true); 
+              }}
+              sessionVerouillee={sessionValidee} 
+              initialData={!sessionValidee ? {
+                anneeAcademique: originalSession.anneeAcademique || '',
+                semestre: String(originalSession.semestre || ''),
+                codeProgramme: originalSession.codeProgramme || '',
+                creditCours: String(originalSession.creditCours || ''),
+                idEnseignant: originalSession.idEnseignant || ''  
+              } : null}
+            />
 
           {/* BOUTON TRANSFERT */}
           <div style={{ display: 'flex',  gap: '15px', justifyContent: 'center' }}>
@@ -194,6 +211,20 @@ function TransferSession() {
           </div>
 
         </div>
+
+        {/* === ALERTE FLOTTANTE === */}
+        {alerte && (
+          <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              zIndex: 1050,
+              minWidth: '250px'
+            }} className={`alert alert-${alerte.type} alert-dismissible fade show`}>
+              {alerte.message}
+              <button type="button" className="btn-close" onClick={() => { if (alerte && alerte.redirect) navigate('/search-modify'); setAlerte(null); }} />
+            </div>
+      )}
       </main>
     </div>
   );

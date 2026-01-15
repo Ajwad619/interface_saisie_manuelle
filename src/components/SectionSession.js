@@ -176,22 +176,22 @@ const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessi
 
 
   useEffect(() => {
-  if (!sessionVerouillee) {
-    // le parent demande un reset => on reset local
-    setAnneeAcademique('');
-    setSemestre('');
-    setCreditCours('');
-    setCodeProgramme('');
-    setIdEnseignant('');
-    setShowMiniForm(false);
-    setNouveauCode('');
-    setNouveauTitre('');
-    setNouveauNiveau('');
-    setErreurs({});
-    setAlerte(null);
-    setSessionRemplie(false);
-  }
-}, [sessionVerouillee]);
+    if (!sessionVerouillee) {
+      // le parent demande un reset => on reset local
+      setAnneeAcademique('');
+      setSemestre('');
+      setCreditCours('');
+      setCodeProgramme('');
+      setIdEnseignant('');
+      setShowMiniForm(false);
+      setNouveauCode('');
+      setNouveauTitre('');
+      setNouveauNiveau('');
+      setErreurs({});
+      setAlerte(null);
+      setSessionRemplie(false);
+    }
+  }, [sessionVerouillee]);
 
 
   // Surbrillance rouge

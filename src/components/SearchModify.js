@@ -1,7 +1,7 @@
 // === Page de recherche d'une session ou d'une inscription ===
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Breadcrumb from './Breadcrumb'; 
 import debounce from 'lodash.debounce';
@@ -10,6 +10,7 @@ import { rechercherDonnees, getAnneesAcademiques, getCodesProgramme, deleteInscr
 function SearchModify() {
   // === HOOKS DE NAVIGATION ET AUTH ===
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
 
   // === GESTION DE LA DÉCONNEXION ===
@@ -46,6 +47,7 @@ function SearchModify() {
   const [anneesAcademiques, setAnneesAcademiques] = useState([]); // ← nouvelles années
   const [codesProgramme, setCodesProgramme] = useState([]);      // ← nouveaux codes
   const [loadingOptions, setLoadingOptions] = useState(true);    // ← chargement initial
+  const [alerte, setAlerte] = useState(null);
 
   // === FONCTION DE RECHERCHE DÉBOUNCÉE (pause de 0.3s) ===
   const debouncedSearch = React.useRef(
@@ -140,6 +142,22 @@ function SearchModify() {
     chargerOptions();
   }, []);
 
+  // Si une alerte est passée via navigate state, l'afficher puis la retirer
+  useEffect(() => {
+    if (location.state && location.state.alerte) {
+      setAlerte(location.state.alerte);
+      // Effacer le state de navigation pour ne pas ré-afficher l'alerte au retour
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
+  useEffect(() => {
+    if (alerte) {
+      const t = setTimeout(() => setAlerte(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [alerte]);
+
   // === GESTION DU CLIQUE SUR "CHOISIR" ===
   const handleChoisirSession = (session) => {
     console.log("Session choisie :", session);
@@ -194,6 +212,20 @@ function SearchModify() {
           flexDirection: 'column',
           alignItems: 'center'
         }}>
+
+        {/* Alerte reçue via navigation */}
+        {alerte && (
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1050,
+            minWidth: '250px'
+          }} className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
+            {alerte.message}
+            <button type="button" className="btn-close" onClick={() => setAlerte(null)} />
+          </div>
+        )}
         
         {loadingOptions ? (
           <div className="text-center my-3">

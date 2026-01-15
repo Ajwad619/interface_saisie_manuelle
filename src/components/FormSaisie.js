@@ -52,10 +52,10 @@ function FormSaisie() {
 
 
   // === TRANSITIONS ENTRE LES SECTIONS ===
-  const handleAfterSearch = (coursData) => {
-    if (coursData) {
-      setIntituleCours(coursData.intituleCours);
-      setSigleCours(coursData.sigleCours);
+  const handleAfterSearch = (selectedCours) => {
+    if (selectedCours) {
+      setIntituleCours(selectedCours.intituleCours);
+      setSigleCours(selectedCours.sigleCours);
     }
     setShowSection2(true);
   };
@@ -133,7 +133,7 @@ function FormSaisie() {
 
   // === RENDU ===
   return (
-    <div className="container mt-12 mb-5">
+    <div className="container mt-12 mb-5" style ={{ maxWidth: '100%' }}>
        {/* BREADCRUMB */}
         <Breadcrumb />
 
@@ -151,18 +151,10 @@ function FormSaisie() {
       <div className="row justify-content-center">
         <div className="col-12 col-lg-10">
 
-          {/* === ALERTE GLOBALE === */}
-          {alerte && (
-            <div className={`alert alert-${alerte.type} alert-dismissible fade show`} role="alert">
-              {alerte.message}
-              <button type="button" className="btn-close" onClick={() => setAlerte(null)} />
-            </div>
-          )}
-
           {/* === SECTION COURS === */}
           <SectionCours
             ref={coursRef}
-            onAfterSearch={handleAfterSearch}
+            onAfterValidation={handleAfterSearch}
             onReinitialiser={handleResetCours}
           />
 
@@ -175,7 +167,14 @@ function FormSaisie() {
               onReinitialiser={() => {
                 handleResetSession();
               }}
-              sessionVerouillee={sessionVerouillee} 
+              sessionVerouillee={sessionVerouillee}
+              initialData={{
+                anneeAcademique: '',
+                semestre: '',
+                codeProgramme: '', 
+                creditCours: '',
+                idEnseignant: ''
+              }} 
             />
           </div>
 
