@@ -168,13 +168,6 @@ function FormSaisie() {
                 handleResetSession();
               }}
               sessionVerouillee={sessionVerouillee}
-              initialData={{
-                anneeAcademique: '',
-                semestre: '',
-                codeProgramme: '', 
-                creditCours: '',
-                idEnseignant: ''
-              }} 
             />
           </div>
 

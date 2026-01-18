@@ -75,6 +75,7 @@ try {
     } else {
         // === RECHERCHE D'INSCRIPTIONS ===
         $sql = "SELECT 
+                    id,
                     matricule,
                     nom,
                     prenoms,

@@ -76,7 +76,7 @@ function TransferSession() {
             navigate('/search-modify');
           }
           setAlerte(null);
-        }, 800); 
+        }, 3000); 
         return () => clearTimeout(timer);
       }
     }, [alerte, navigate]);
@@ -98,11 +98,8 @@ function TransferSession() {
       };
 
       await transfererSession(data);
-      // Afficher l'alerte localement (même comportement que FormSaisie.js)
-      // et demander une redirection après fermeture/auto-fermeture
       setAlerte({ type: "success", message: "Transfert réussi !", redirect: true });
-      // Ne pas naviguer immédiatement afin que l'alerte reste visible sur cette page
-
+      
     } catch (error) {
       console.error("Erreur transfert:", error);
       let message = "Une erreur inconnue est survenue.";

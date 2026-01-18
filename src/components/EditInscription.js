@@ -5,6 +5,34 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb';
 import { getInscriptionById, updateInscription } from '../services/api';
 
+// Fonction de comparaison profonde
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+
+  const keysA = Array.isArray(a) ? null : Object.keys(a);
+  const keysB = Array.isArray(b) ? null : Object.keys(b);
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+
+  if (keysA && keysB && keysA.length !== keysB.length) return false;
+
+  if (keysA) {
+    for (let key of keysA) {
+      if (!keysB.includes(key) || !deepEqual(a[key], b[key])) return false;
+    }
+  }
+
+  return true;
+}
+
 const EditInscription = () => {
   const [loading, setLoading] = useState(true);
   const [alerte, setAlerte] = useState(null);
@@ -17,6 +45,7 @@ const EditInscription = () => {
   const [appreciation, setAppreciation] = useState('');
 
   const [isModified, setIsModified] = useState(false);
+  const [originalState, setOriginalState] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,12 +55,10 @@ const EditInscription = () => {
 
   const ajouterEvaluation = () => {
     setEvaluations(prev => [...prev, { id: Date.now(), intitule: '', pourcentage: '', note: '' }]);
-    setIsModified(true);
   };
 
   const supprimerEvaluation = (evalId) => {
     setEvaluations(prev => prev.filter(e => e.id !== evalId));
-    setIsModified(true);
   };
 
   const modifierEvaluation = (evalId, field, value) => {
@@ -41,13 +68,11 @@ const EditInscription = () => {
         setEvaluations(prev => 
           prev.map(e => e.id === evalId ? { ...e, [field]: value } : e)
         );
-        setIsModified(true);
       }
     } else {
       setEvaluations(prev => 
         prev.map(e => e.id === evalId ? { ...e, [field]: value } : e)
       );
-      setIsModified(true);
     }
   };
 
@@ -58,23 +83,32 @@ const EditInscription = () => {
 
   const handleNoteRattrapageChange = (value) => {
     setNoteRattrapage(value);
-    setIsModified(true);
   };
   
   const handleMoyenneFinaleChange = (value) => {
     setMoyenneFinale(value);
-    setIsModified(true);
   };
   
   const handleSanctionChange = (value) => {
     setSanction(value);
-    setIsModified(true);
   };
   
   const handleAppreciationChange = (value) => {
     setAppreciation(value);
-    setIsModified(true);
   };
+
+  // === FERME L'ALERTE AUTOMATIQUEMENT ===
+  useEffect(() => {
+    if (alerte) {
+      const timer = setTimeout(() => {
+        if (alerte.redirect) {
+          navigate('/search-modify');
+        }
+        setAlerte(null);
+      }, 3000); 
+      return () => clearTimeout(timer);
+    }
+  }, [alerte, navigate]);
 
   // === CHARGER L'INSCRIPTION AU MONTAGE ===
   useEffect(() => {
@@ -114,6 +148,14 @@ const EditInscription = () => {
         setMoyenneFinale(data.moyenneFinale != null ? String(data.moyenneFinale) : '');
         setSanction(data.sanction || '');
         setAppreciation(data.appreciations || '');
+
+        setOriginalState({
+          evaluations: evals,
+          noteRattrapage: data.noteRattrapage != null ? String(data.noteRattrapage) : '',
+          moyenneFinale: data.moyenneFinale != null ? String(data.moyenneFinale) : '',
+          sanction: data.sanction || '',
+          appreciation: data.appreciations || ''
+        });
 
       } catch (error) {
         setAlerte({ type: 'danger', message: error.message });
@@ -156,13 +198,31 @@ const EditInscription = () => {
       };
 
       await updateInscription(dataToUpdate);
-      alert("Modification enregistrée !");
-      navigate('/search-modify'); // Redirige vers la recherche
+      setAlerte({ type: "success", message: "Soumission réussie ! L'inscription a été mise à jour.", redirect: true });
+      // navigate('/search-modify'); // Redirige vers la recherche
 
     } catch (error) {
       setAlerte({ type: 'danger', message: error.message });
     }
   };
+
+  // Vérifier si l'état a réellement changé par rapport à l'original
+  useEffect(() => {
+    if (!originalState) {
+      setIsModified(false);
+      return;
+    }
+
+    const currentState = {
+      evaluations,
+      noteRattrapage,
+      moyenneFinale,
+      sanction,
+      appreciation
+    };
+
+    setIsModified(!deepEqual(currentState, originalState));
+  }, [evaluations, noteRattrapage, moyenneFinale, sanction, appreciation, originalState]);
 
   // === DÉCONNEXION ===
   const handleLogout = () => {
@@ -224,19 +284,19 @@ const EditInscription = () => {
           <div className="row">
             <div className="col-md-4 mb-3">
               <label>Intitulé du cours</label>
-              <input className="form-control" value={inscription?.intituleCours || ''} readOnly />
+              <input className="form-control" value={inscription?.intituleCours || ''} disabled />
             </div>
             <div className="col-md-4 mb-3">
               <label>Année académique</label>
-              <input className="form-control" value={inscription?.anneeAcademique || ''} readOnly />
+              <input className="form-control" value={inscription?.anneeAcademique || ''} disabled />
             </div>
             <div className="col-md-4 mb-3">
               <label>Semestre</label>
-              <input className="form-control" value={inscription?.semestre || ''} readOnly />
+              <input className="form-control" value={inscription?.semestre || ''} disabled />
             </div>
             <div className="col-md-4 mb-3">
               <label>Code programme</label>
-              <input className="form-control" value={inscription?.codeProgramme || ''} readOnly />
+              <input className="form-control" value={inscription?.codeProgramme || ''} disabled />
             </div>
           </div>
         </div>
@@ -368,10 +428,24 @@ const EditInscription = () => {
           <button className="btn btn-secondary" onClick={() => navigate(-1)}>
             Annuler
           </button>
-          <button className="btn btn-primary" onClick={handleValider} disabled={!isModified}>
-            Valider la modification
+          <button className="btn btn-primary" onClick={handleValider} disabled={!isModified} style={{ opacity: isModified ? 1 : 0.5, cursor: isModified ? 'pointer' : 'not-allowed' }}>
+            Soumettre la modification
           </button>
         </div>
+
+        {/* === ALERTE FLOTTANTE === */}
+        {alerte && (
+          <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              zIndex: 1050,
+              minWidth: '250px'
+            }} className={`alert alert-${alerte.type} alert-dismissible fade show`}>
+              {alerte.message}
+              <button type="button" className="btn-close" onClick={() => { if (alerte && alerte.redirect) navigate('/search-modify'); setAlerte(null); }} />
+            </div>
+        )}
       </main>
     </div>
   );
