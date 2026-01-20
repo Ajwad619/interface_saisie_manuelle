@@ -160,6 +160,12 @@ h1.title {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px; 
+}
+
 .top-bar h2 {
   margin: 0; 
   font-size: 18px;
@@ -346,4 +352,38 @@ h1.title {
 
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: #fbf6ebff;
+}
+
+/* --- STYLE POUR LE PROFIL UTILISATEUR DANS LA BARRE DU HAUT --- */
+.user-profile {
+  position: relative;
+  margin-left: 15px;
+}
+
+.user-profile-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.user-profile-btn:hover {
+  background-color: #0b5ed7;
+}
+
+.user-profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px 14px;
+  min-width: 160px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
 }

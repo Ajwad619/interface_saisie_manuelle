@@ -9,6 +9,7 @@ import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import SectionHistorique from './SectionHistorique';
 import { enregistrerInscription } from '../services/api';
+import UserProfile from './UserProfile';
 
 // === COMPOSANT PRINCIPAL ===
 function FormSaisie() {
@@ -140,12 +141,16 @@ function FormSaisie() {
       {/* === BARRE DE NAVIGATION EN HAUT === */}
       <header className="top-bar">
         <h2>Insertion de Données</h2>
-        <button
-          onClick={handleLogout}
-          className="logout-btn-top"
-        >
-          [→] Déconnexion
-        </button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       <div className="row justify-content-center">

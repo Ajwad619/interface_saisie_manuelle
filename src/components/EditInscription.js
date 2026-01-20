@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb';
 import { getInscriptionById, updateInscription } from '../services/api';
+import UserProfile from './UserProfile';
 
 // Fonction de comparaison profonde
 function deepEqual(a, b) {
@@ -264,7 +265,16 @@ const EditInscription = () => {
         borderBottom: '2px solid black'
       }}>
         <h2 className="mb-0">Édition inscription</h2>
-        <button onClick={handleLogout} className="logout-btn-top">[→] Déconnexion</button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       {/* === CONTENU PRINCIPAL === */}

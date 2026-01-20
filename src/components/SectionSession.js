@@ -303,7 +303,7 @@ const SectionSession = forwardRef(({ onAfterValidation , onReinitialiser , sessi
             className={classInput("idEnseignant")}
             value={idEnseignant}
             onChange={(e) => setIdEnseignant(e.target.value)}
-            readOnly={sessionVerouillee}
+            disabled={sessionVerouillee}
           />
           {erreurs.idEnseignant && <div className="invalid-feedback">{erreurs.idEnseignant}</div>}
         </div>

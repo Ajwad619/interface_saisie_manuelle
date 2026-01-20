@@ -4,6 +4,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from './Breadcrumb';
 import { useAuth } from '../context/AuthContext';
+import UserProfile from './UserProfile';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -29,12 +30,16 @@ function AdminDashboard() {
       {/* === BARRE DE NAVIGATION EN HAUT === */}
       <header className="top-bar">
         <h2>Tableau de Bord Admin</h2>
-        <button
-          onClick={handleLogout}
-          className="logout-btn-top"
-        >
-          [→] Déconnexion
-        </button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
     <div className="main-content">

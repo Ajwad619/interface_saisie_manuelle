@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getInscriptionsSession, deleteInscription } from '../services/api';
 import Breadcrumb from '../components/Breadcrumb';
+import UserProfile from './UserProfile';
 
 const SessionInscriptions = () => {
 
@@ -68,7 +69,16 @@ const SessionInscriptions = () => {
         <Breadcrumb customPath={{ path: '/session-inscriptions', label: 'Inscriptions de la session' }} parentPaths={['/search-modify', '/edit-session']} />
         <header className="top-bar bg-light-yellow" style={{ padding: '15px 30px', display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid black' }}>
           <h2 className="mb-0">Inscriptions de la session</h2>
-          <button onClick={handleLogout} className="logout-btn-top">[→] Déconnexion</button>
+          <div className="top-bar-right">
+            <button
+              onClick={handleLogout}
+              className="logout-btn-top"
+            >
+              [→] Déconnexion
+            </button>
+
+            <UserProfile />
+          </div>
         </header>
         <div className="text-center my-5">
           <div className="spinner-border text-primary" role="status">
@@ -91,7 +101,16 @@ const SessionInscriptions = () => {
         borderBottom: '2px solid black'
       }}>
         <h2 className="mb-0">Inscriptions de la session</h2>
-        <button onClick={handleLogout} className="logout-btn-top">[→] Déconnexion</button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       <main className="container mt-4" style={{ maxWidth: '80%' }}>

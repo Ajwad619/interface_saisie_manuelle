@@ -13,11 +13,11 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (role === 'user') {
-      navigate('/cours');
-    }
+      if (role === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (role === 'user') {
+        navigate('/cours');
+      }
   }, [role, navigate]);
 
   const handleSubmit = async (e) => {

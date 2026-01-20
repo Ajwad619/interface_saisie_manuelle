@@ -22,7 +22,7 @@ function ProtectedRoute({ children, allowedRoles }) {
       return <Navigate to="/admin-dashboard" replace />;
     }
   }
-  
+
   return children;
 }
 

@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true); // Pour éviter le flash de contenu
+  const [identifiant, setIdentifiant] = useState(null);
 
   // Vérifier la session au chargement
   useEffect(() => {
@@ -28,9 +29,11 @@ export const AuthProvider = ({ children }) => {
     if (storedRole && storedId) {
       setIsAuthenticated(true);
       setRole(storedRole);
+      setIdentifiant(storedId);
     } else {
       setIsAuthenticated(false);
       setRole(null);
+      setIdentifiant(null);
     }
     setLoading(false);
   }, []);
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('userIdentifiant', identifiant);
     setIsAuthenticated(true);
     setRole(role);
+    setIdentifiant(identifiant);
   };
 
   // Fonction de déconnexion
@@ -49,12 +53,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userIdentifiant');
     setIsAuthenticated(false);
     setRole(null);
+    setIdentifiant(null);
   };
 
   // Valeur fournie au contexte
   const value = {
     isAuthenticated,
     role,
+    identifiant,
     loading,
     login,
     logout

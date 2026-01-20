@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Breadcrumb from './Breadcrumb'; 
 import debounce from 'lodash.debounce';
 import { rechercherDonnees, getAnneesAcademiques, getCodesProgramme, deleteInscription } from '../services/api'; 
+import UserProfile from './UserProfile';
 
 function SearchModify() {
   // === HOOKS DE NAVIGATION ET AUTH ===
@@ -197,12 +198,16 @@ function SearchModify() {
       {/* === BARRE DE NAVIGATION === */}
       <header className="top-bar">
         <h2>Rechercher et Modifier</h2>
-        <button
-          onClick={handleLogout}
-          className="logout-btn-top"
-        >
-          [→] Déconnexion
-        </button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       {/* === CONTENU PRINCIPAL === */}

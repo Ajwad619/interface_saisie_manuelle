@@ -7,6 +7,7 @@ import Breadcrumb from './Breadcrumb';
 import SectionCours from './SectionCours';
 import SectionSession from './SectionSession';
 import { transfererSession } from '../services/api';
+import UserProfile from './UserProfile';
 
 
 function TransferSession() {
@@ -63,7 +64,8 @@ function TransferSession() {
       newSession.anneeAcademique !== originalSession.anneeAcademique ||
       newSession.semestre !== originalSession.semestre ||
       newSession.codeProgramme !== originalSession.codeProgramme ||
-      Number(newSession.creditCours) !== Number(originalSession.creditCours);
+      Number(newSession.creditCours) !== Number(originalSession.creditCours) ||
+      newSession.idEnseignant !== originalSession.idEnseignant || false;
 
     setIsFormValid(coursChanged || sessionChanged);
   }, [newCours, newSession, originalSession]);
@@ -123,9 +125,16 @@ function TransferSession() {
 
       <header className="top-bar">
         <h2>Transférer le Cours</h2>
-        <button onClick={handleLogout} className="logout-btn-top">
-          [→] Déconnexion
-        </button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       <main style={{

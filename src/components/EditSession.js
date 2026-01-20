@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Breadcrumb from './Breadcrumb';
+import UserProfile from './UserProfile';
 
 function EditSession() {
   const navigate = useNavigate();
@@ -56,9 +57,16 @@ function EditSession() {
       {/* BARRE DE NAVIGATION */}
       <header className="top-bar">
         <h2>Détails de la Session</h2>
-        <button onClick={handleLogout} className="logout-btn-top">
-          [→] Déconnexion
-        </button>
+        <div className="top-bar-right">
+          <button
+            onClick={handleLogout}
+            className="logout-btn-top"
+          >
+            [→] Déconnexion
+          </button>
+
+          <UserProfile />
+        </div>
       </header>
 
       <main style={{
