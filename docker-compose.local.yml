@@ -1,4 +1,5 @@
-# docker-compose.yml
+# docker-compose.local.yml — TEST LOCAL UNIQUEMENT
+
 services:
 
   # ─── MySQL ───────────────────────────────────────────
@@ -11,9 +12,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ../files/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"       # accès direct depuis DBeaver/TablePlus
     networks:
-      - internal_net
+      - ismp_local
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
              "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
@@ -31,14 +34,13 @@ services:
       PMA_USER: ${MYSQL_USER}
       PMA_PASSWORD: ${MYSQL_PASSWORD}
       UPLOAD_LIMIT: 64M
-    expose:
-      - "80"
+    ports:
+      - "8080:80"         # → http://localhost:8080
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - internal_net
-      - dokploy-network   
+      - ismp_local
 
   # ─── Backend PHP ─────────────────────────────────────
   backend:
@@ -47,19 +49,21 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      DB_HOST: mysql           # nom du service = hostname interne
+      DB_HOST: mysql
       DB_TEMP: ${DB_TEMP}
       DB_PROD: ${DB_PROD}
       DB_USER: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
-    expose:
-      - "80"
+    ports:
+      - "8082:80"         # → http://localhost:8082
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - internal_net
-      - dokploy-network       
+      - ismp_local
+    volumes:
+      # Hot-reload : vos fichiers PHP se rechargent sans rebuild
+      - ./backend:/var/www/html
 
   # ─── Frontend React ──────────────────────────────────
   frontend:
@@ -67,20 +71,18 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL}
+        REACT_APP_API_URL: http://localhost:8082
     restart: unless-stopped
-    expose:
-      - "80"
+    ports:
+      - "4000:80"         # → http://localhost:4000
     depends_on:
       - backend
     networks:
-      - dokploy-network       
+      - ismp_local
 
 networks:
-  internal_net:
+  ismp_local:
     driver: bridge
-  dokploy-network:
-    external: true
 
 volumes:
   mysql_data:

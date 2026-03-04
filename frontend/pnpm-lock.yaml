@@ -23,6 +23,9 @@ importers:
       bootstrap:
         specifier: ^5.3.8
         version: 5.3.8(@popperjs/core@2.11.8)
+      lodash.debounce:
+        specifier: ^4.0.8
+        version: 4.0.8
       react:
         specifier: ^19.2.0
         version: 19.2.0
