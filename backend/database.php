@@ -1,11 +1,11 @@
 <?php
 // config/database.php
 
-$host     = '127.0.0.1';
-$db_temp  = 'dataFilter';
-$db_prod  = 'prod';
-$user     = 'root';
-$password = 'Root@123';
+$host     = getenv('DB_HOST')      ?: '127.0.0.1';
+$db_temp  = getenv('DB_TEMP')      ?: 'dataFilter';
+$db_prod  = getenv('DB_PROD')      ?: 'ismp';
+$user     = getenv('DB_USER')      ?: 'root';
+$password = getenv('DB_PASSWORD')  ?: 'root';
 
 try {
     // Connexion PDO sans base sélectionnée par défaut

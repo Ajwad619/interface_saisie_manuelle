@@ -1,0 +1,86 @@
+# docker-compose.yml
+services:
+
+  # ─── MySQL ───────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../files/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ─── phpMyAdmin ──────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      UPLOAD_LIMIT: 64M
+    expose:
+      - "80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - internal_net
+      - dokploy-network   # exposé via Traefik
+
+  # ─── Backend PHP ─────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql           # nom du service = hostname interne
+      DB_TEMP: ${DB_TEMP}
+      DB_PROD: ${DB_PROD}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - "80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - internal_net
+      - dokploy-network       
+
+  # ─── Frontend React ──────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      - backend
+    networks:
+      - dokploy-network        # exposé via Traefik
+
+networks:
+  internal_net:
+    driver: bridge
+  dokploy-network:
+    external: true
+
+volumes:
+  mysql_data:
